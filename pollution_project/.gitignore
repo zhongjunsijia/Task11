@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+local_settings.py
+*.sqlite3
+
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large files
+*.pkl
+*.h5
+*.pt
+*.bin
+
+# Uploads
+uploads/
+
+# Static files
+staticfiles/
+
+# Test files
+/tests/
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+.coverage
+
+# Build
+/build/
+dist/
+*.egg-info/
+
+# Temporary files
+tmp/
+temp/
+
+# Backup files
+*.bak
+*.backup
