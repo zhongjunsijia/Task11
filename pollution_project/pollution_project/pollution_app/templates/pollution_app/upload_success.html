@@ -1,0 +1,37 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}上传成功 - 气象污染预测系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-container { max-width: 600px; margin: 50px auto; text-align: center; }
+    .success-icon { font-size: 80px; color: #28a745; margin-bottom: 20px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container success-container">
+    <div class="success-icon">✓</div>
+    <h1 class="mb-4">数据上传成功！</h1>
+    <p class="lead text-muted mb-5">
+        您上传的CSV文件已成功处理，共导入 {{ total }} 条数据，其中有效数据 {{ valid }} 条，无效数据 {{ invalid }} 条。
+    </p>
+
+    {% if invalid > 0 %}
+        <div class="alert alert-warning mb-4">
+            <h5>无效数据原因：</h5>
+            <ul class="text-start">
+                {% for reason in error_reasons %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="d-flex justify-content-center gap-3">
+        <a href="{% url 'upload' %}" class="btn btn-primary">继续上传</a>
+        <a href="{% url 'history' %}" class="btn btn-outline-secondary">查看历史数据</a>
+        <a href="{% url 'index' %}" class="btn btn-outline-secondary">返回首页</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ page_title }}</h2>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">创建新数据版本</h5>
+            
+            {% if messages %}
+            <div class="alert alert-danger">
+                {% for message in messages %}
+                <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="versionName">版本名称</label>
+                    <input type="text" class="form-control" id="versionName" name="version_name" placeholder="请输入版本名称" required>
+                </div>
+                
+                <div class="form-group mt-3">
+                    <label for="description">版本描述</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="请输入版本描述"></textarea>
+                </div>
+                
+                <div class="form-group mt-3">
+                    <label>选择数据（最多100条）</label>
+                    <div class="table-responsive mt-2">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAll"></th>
+                                    <th>日期</th>
+                                    <th>PM2.5</th>
+                                    <th>PM10</th>
+                                    <th>NO2</th>
+                                    <th>SO2</th>
+                                    <th>O3</th>
+                                    <th>CO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in data %}
+                                <tr>
+                                    <td><input type="checkbox" name="data_ids" value="{{ item.id }}"></td>
+                                    <td>{{ item.date|date:'Y-m-d H:i' }}</td>
+                                    <td>{{ item.pm25 }}</td>
+                                    <td>{{ item.pm10 }}</td>
+                                    <td>{{ item.no2 }}</td>
+                                    <td>{{ item.so2 }}</td>
+                                    <td>{{ item.o3 }}</td>
+                                    <td>{{ item.co }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">创建版本</button>
+                    <a href="{% url 'data_version_management' %}" class="btn btn-secondary">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // 全选/取消全选
+        $('#selectAll').change(function() {
+            $('input[name="data_ids"]').prop('checked', $(this).prop('checked'));
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "pollution_app/base.html" %}
+
+{% block title %}系统日志 - 大气污染预测系统{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">{{ page_title }}</h1>
+    
+    <!-- 过滤表单 -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">日志过滤</h6>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="form-inline">
+                <div class="form-group mr-3 mb-2">
+                    <label for="level" class="mr-2">日志级别:</label>
+                    <select class="form-control" id="level" name="level">
+                        <option value="">全部</option>
+                        <option value="info" {% if level == 'info' %}selected{% endif %}>信息</option>
+                        <option value="warning" {% if level == 'warning' %}selected{% endif %}>警告</option>
+                        <option value="error" {% if level == 'error' %}selected{% endif %}>错误</option>
+                        <option value="critical" {% if level == 'critical' %}selected{% endif %}>严重</option>
+                    </select>
+                </div>
+                <div class="form-group mr-3 mb-2">
+                    <label for="action" class="mr-2">操作类型:</label>
+                    <select class="form-control" id="action" name="action">
+                        <option value="">全部</option>
+                        <option value="login" {% if action == 'login' %}selected{% endif %}>登录</option>
+                        <option value="logout" {% if action == 'logout' %}selected{% endif %}>退出</option>
+                        <option value="data_upload" {% if action == 'data_upload' %}selected{% endif %}>数据上传</option>
+                        <option value="data_export" {% if action == 'data_export' %}selected{% endif %}>数据导出</option>
+                        <option value="model_train" {% if action == 'model_train' %}selected{% endif %}>模型训练</option>
+                        <option value="model_deploy" {% if action == 'model_deploy' %}selected{% endif %}>模型部署</option>
+                        <option value="version_create" {% if action == 'version_create' %}selected{% endif %}>版本创建</option>
+                        <option value="version_activate" {% if action == 'version_activate' %}selected{% endif %}>版本激活</option>
+                        <option value="system_settings" {% if action == 'system_settings' %}selected{% endif %}>系统设置</option>
+                        <option value="user_management" {% if action == 'user_management' %}selected{% endif %}>用户管理</option>
+                        <option value="role_management" {% if action == 'role_management' %}selected{% endif %}>角色管理</option>
+                    </select>
+                </div>
+                <div class="form-group mr-3 mb-2">
+                    <label for="start_date" class="mr-2">开始日期:</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                </div>
+                <div class="form-group mr-3 mb-2">
+                    <label for="end_date" class="mr-2">结束日期:</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">过滤</button>
+                <a href="{% url 'system_logs_view' %}" class="btn btn-secondary mb-2 ml-2">重置</a>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 日志列表 -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">日志记录</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>级别</th>
+                            <th>操作类型</th>
+                            <th>内容</th>
+                            <th>用户</th>
+                            <th>IP地址</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.created_at }}</td>
+                            <td>
+                                {% if log.level == 'info' %}
+                                    <span class="badge badge-info">{{ log.get_level_display }}</span>
+                                {% elif log.level == 'warning' %}
+                                    <span class="badge badge-warning">{{ log.get_level_display }}</span>
+                                {% elif log.level == 'error' %}
+                                    <span class="badge badge-danger">{{ log.get_level_display }}</span>
+                                {% elif log.level == 'critical' %}
+                                    <span class="badge badge-dark">{{ log.get_level_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ log.get_action_display }}</td>
+                            <td>{{ log.message }}</td>
+                            <td>{{ log.user.username|default:'系统' }}</td>
+                            <td>{{ log.ip_address }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">暂无日志记录</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('#dataTable').DataTable({
+        "order": [[0, "desc"]],
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "全部"]]
+    });
+});
+</script>
+{% endblock %}

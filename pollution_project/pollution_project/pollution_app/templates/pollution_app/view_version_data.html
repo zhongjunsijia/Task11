@@ -1,0 +1,71 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ page_title }}</h2>
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="card-title">版本信息</h5>
+                    <p class="card-text">
+                        <strong>版本名称:</strong> {{ version.version_name }}<br>
+                        <strong>描述:</strong> {{ version.description|default:'无' }}<br>
+                        <strong>数据条数:</strong> {{ version.data_count }}<br>
+                        <strong>上传用户:</strong> {{ version.upload_user.username|default:'系统' }}<br>
+                        <strong>创建时间:</strong> {{ version.created_at|date:'Y-m-d H:i' }}<br>
+                        <strong>状态:</strong> {% if version.is_active %}<span class="badge bg-success">激活</span>{% else %}<span class="badge bg-secondary">未激活</span>{% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'data_version_management' %}" class="btn btn-secondary">返回列表</a>
+            </div>
+            
+            {% if data %}
+            <h5 class="card-title mt-4">版本数据</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>日期时间</th>
+                            <th>PM2.5</th>
+                            <th>PM10</th>
+                            <th>NO2</th>
+                            <th>SO2</th>
+                            <th>O3</th>
+                            <th>CO</th>
+                            <th>温度</th>
+                            <th>湿度</th>
+                            <th>风速</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in data %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.date|date:'Y-m-d H:i' }}</td>
+                            <td>{{ item.pm25 }}</td>
+                            <td>{{ item.pm10 }}</td>
+                            <td>{{ item.no2 }}</td>
+                            <td>{{ item.so2 }}</td>
+                            <td>{{ item.o3 }}</td>
+                            <td>{{ item.co }}</td>
+                            <td>{{ item.temperature }}</td>
+                            <td>{{ item.humidity }}</td>
+                            <td>{{ item.wind_speed }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                该版本暂无数据
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

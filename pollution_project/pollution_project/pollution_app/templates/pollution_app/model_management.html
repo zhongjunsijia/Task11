@@ -1,0 +1,52 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ page_title }}</h2>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">模型列表</h5>
+            <p class="card-text">这是模型管理页面，只有拥有模型管理权限的用户才能访问。</p>
+            
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>模型名称</th>
+                            <th>版本</th>
+                            <th>模型类型</th>
+                            <th>城市</th>
+                            <th>污染物</th>
+                            <th>测试集R²</th>
+                            <th>测试集RMSE</th>
+                            <th>训练时间</th>
+                            <th>是否激活</th>
+                            <th>创建时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for model in models %}
+                        <tr>
+                            <td>{{ model.id }}</td>
+                            <td>{{ model.model_name }}</td>
+                            <td>{{ model.version }}</td>
+                            <td>{{ model.get_model_type_display }}</td>
+                            <td>{{ model.city }}</td>
+                            <td>{{ model.pollutant }}</td>
+                            <td>{{ model.test_r2|floatformat:4 }}</td>
+                            <td>{{ model.test_rmse|floatformat:4 }}</td>
+                            <td>{{ model.training_time|floatformat:2 }}秒</td>
+                            <td>{{ model.is_active|yesno:'是,否' }}</td>
+                            <td>{{ model.created_at|date:'Y-m-d H:i' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

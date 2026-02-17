@@ -1,0 +1,21 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ page_title }}</h2>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">系统信息</h5>
+            <p class="card-text">这是系统设置页面，只有拥有系统设置权限的用户才能访问。</p>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">当前用户: {{ user.username }}</li>
+                <li class="list-group-item">系统版本: 1.0.0</li>
+                <li class="list-group-item">Django版本: 6.0.2</li>
+                <li class="list-group-item">Python版本: 3.11+</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

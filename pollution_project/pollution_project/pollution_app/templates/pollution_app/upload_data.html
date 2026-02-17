@@ -1,0 +1,106 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}数据上传 - 气象污染预测系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container { margin-top: 50px; }
+    .card { margin-bottom: 20px; }
+    .table-responsive { max-height: 300px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">批量上传污染数据</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- 文件上传字段 -->
+                <div class="mb-4">
+                    <label for="{{ form.file.id_for_label }}" class="form-label">
+                        {{ form.file.label }}
+                    </label>
+                    {{ form.file }}
+                    <div class="form-text">请上传CSV格式的污染数据文件</div>
+                </div>
+
+                <!-- 提交按钮 -->
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-upload mr-2"></i>上传文件
+                </button>
+            </form>
+
+            <!-- 错误提示 -->
+            {% if error %}
+            <div class="alert alert-danger mt-3">
+                <i class="fa fa-exclamation-circle mr-2"></i>{{ error }}
+            </div>
+            {% endif %}
+
+            <!-- 上传成功提示 -->
+            {% if success %}
+            <div class="alert alert-success mt-3">
+                <i class="fa fa-check-circle mr-2"></i>上传成功！数据已成功导入到系统中。
+            </div>
+            {% endif %}
+
+            <!-- CSV格式说明 -->
+            <div class="mt-4 bg-light p-3 rounded">
+                <h5 class="text-muted">CSV文件格式要求：</h5>
+                <pre class="mb-0">date,pm25,pm10,temperature,humidity,wind_speed</pre>
+                <pre>2025-01-01 00:00,56.2,89.5,26.5,60,3.2</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近上传记录 -->
+    {% if recent_uploads %}
+    <div class="card">
+        <div class="card-header">
+            <h5>最近上传记录</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>文件名</th>
+                            <th>上传时间</th>
+                            <th>状态</th>
+                            <th>处理记录数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for upload in recent_uploads %}
+                        <tr>
+                            <td>{{ upload.file.name }}</td>
+                            <td>{{ upload.upload_date|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                {% if upload.status == '成功' %}
+                                <span class="badge bg-success">{{ upload.status }}</span>
+                                {% elif upload.status == '失败' %}
+                                <span class="badge bg-danger">{{ upload.status }}</span>
+                                {% else %}
+                                <span class="badge bg-warning">{{ upload.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ upload.records_processed }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 页面专属JS -->
+{% endblock %}

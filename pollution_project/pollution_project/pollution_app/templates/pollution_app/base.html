@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}气象污染预测系统{% endblock %}</title>
+    <!-- 引入公共CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 导航栏核心代码 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <!-- 系统名称 -->
+            <a class="navbar-brand" href="/">气象污染预测系统</a>
+
+            <!-- 移动端菜单按钮 -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#mainNavbar" aria-controls="mainNavbar"
+                    aria-expanded="false" aria-label="切换导航">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- 主导航菜单 - 四个核心功能 -->
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto mx-4">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/monitoring/' in request.path %}active{% endif %}"
+                           href="{% url 'monitoring_analysis' %}">监测分析</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/forecast/' in request.path %}active{% endif %}"
+                           href="{% url 'air_pollution_forecast' %}">预报预警</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/data-management/' in request.path %}active{% endif %}"
+                           href="{% url 'data_management' %}">数据管理</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/system/' in request.path %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            系统管理
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'system_settings' %}">系统设置</a></li>
+                            <li><a class="dropdown-item" href="{% url 'user_management' %}">用户管理</a></li>
+                            <li><a class="dropdown-item" href="{% url 'role_management' %}">角色管理</a></li>
+                            <li><a class="dropdown-item" href="{% url 'model_management_view' %}">模型管理</a></li>
+                            <li><a class="dropdown-item" href="{% url 'batch_prediction_view' %}">批量预测</a></li>
+                            <li><a class="dropdown-item" href="{% url 'prediction_history_view' %}">预测历史</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/data-version/' in request.path %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            数据版本
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'data_version_management' %}">版本管理</a></li>
+                            <li><a class="dropdown-item" href="{% url 'create_data_version_view' %}">创建版本</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- 右侧功能区 -->
+                <div class="d-flex align-items-center gap-3">
+                    {% if user.is_authenticated %}
+                        <!-- 已登录状态：用户菜单 -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center gap-2"
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle" style="font-size: 1.2rem;"></i>
+                                <span>{{ user.username }}</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'view_profile' %}">个人信息修改</a></li>
+                                <li><a class="dropdown-item" href="{% url 'view_history' %}">我的上传记录</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'logout' %}"
+                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        退出登录
+                                    </a>
+                                    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+                                        {% csrf_token %}
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <!-- 未登录状态：登录按钮 -->
+                        <a href="{% url 'login' %}" class="text-white btn btn-outline-light">登录</a>
+                    {% endif %}
+
+                    <!-- 管理员入口 -->
+                    <a href="{% url 'system_settings' %}" class="text-white btn btn-outline-light">管理员入口</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面内容区域 -->
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- 引入公共JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

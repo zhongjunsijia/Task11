@@ -1,0 +1,159 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}历史数据查询 - 气象污染预测系统{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- 左侧子项导航 -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">数据管理</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="{% url 'data_management' %}" class="text-decoration-none">数据上传</a>
+                    </li>
+                    <li class="list-group-item ">
+                        <a href="{% url 'history_query' %}" class="text-decoration-none active fw-bold">历史数据查询</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'data_export' %}" class="text-decoration-none">数据导出</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'data_operation' %}" class="text-decoration-none">数据操作</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 右侧内容区域 -->
+        <div class="col-md-9">
+            <!-- 历史数据查询部分 -->
+            <div id="history-query" class="card">
+                <div class="card-header">
+                    <h5>历史数据查询</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="input-group" style="width: auto; min-width: 180px;">
+                                <span class="input-group-text">开始日期</span>
+                                <input type="date" class="form-control" id="historyStartDate">
+                            </div>
+                            <div class="input-group" style="width: auto; min-width: 180px;">
+                                <span class="input-group-text">结束日期</span>
+                                <input type="date" class="form-control" id="historyEndDate">
+                            </div>
+                            <button id="queryHistoryBtn" class="btn btn-primary align-self-end">
+                                <i class="fa fa-search mr-2"></i>查询
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 历史数据表格 -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>时间</th>
+                                    <th>PM2.5</th>
+                                    <th>PM10</th>
+                                    <th>NO₂</th>
+                                    <th>SO₂</th>
+                                    <th>O₃</th>
+                                    <th>CO</th>
+                                    <th>温度(°C)</th>
+                                    <th>湿度(%)</th>
+                                    <th>气压(hPa)</th>
+                                    <th>降水量(mm)</th>
+                                    <th>风速(m/s)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <tr>
+                                    <td colspan="9" class="text-center">请选择日期范围并点击查询</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 设置默认日期为最近7天
+    const today = new Date();
+    const lastWeek = new Date();
+    lastWeek.setDate(today.getDate() - 7);
+
+    const formatDate = (date) => {
+        return date.toISOString().split('T')[0];
+    };
+
+    document.getElementById('historyStartDate').value = formatDate(lastWeek);
+    document.getElementById('historyEndDate').value = formatDate(today);
+
+    // 绑定查询按钮事件
+    document.getElementById('queryHistoryBtn').addEventListener('click', queryHistoryData);
+});
+
+// 查询历史数据
+function queryHistoryData() {
+    const startDate = document.getElementById('historyStartDate').value;
+    const endDate = document.getElementById('historyEndDate').value;
+    const tableBody = document.getElementById('historyTableBody');
+
+    if (!startDate || !endDate) {
+        tableBody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">请选择完整的日期范围</td></tr>';
+        return;
+    }
+
+    // 显示加载状态
+    tableBody.innerHTML = '<tr><td colspan="9" class="text-center">加载数据中...</td></tr>';
+
+    // 模拟API请求（实际项目中替换为真实接口调用）
+    setTimeout(() => {
+        try {
+            const dataCount = 5;
+            let html = '';
+
+            for (let i = 0; i < dataCount; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+
+                html += `
+                <tr>
+                    <td>${dateStr}</td>
+                    <td>${(Math.random() * 100 + 10).toFixed(1)}</td>
+                    <td>${(Math.random() * 120 + 20).toFixed(1)}</td>
+                    <td>${(Math.random() * 50 + 5).toFixed(1)}</td>
+                    <td>${(Math.random() * 30 + 2).toFixed(1)}</td>
+                    <td>${(Math.random() * 100 + 20).toFixed(1)}</td>
+                    <td>${(Math.random() * 3 + 0.5).toFixed(1)}</td>
+                    <td>${(Math.random() * 15 + 15).toFixed(1)}</td>    <!-- 温度 -->
+                    <td>${(Math.random() * 40 + 30).toFixed(0)}</td>    <!-- 湿度 -->
+                    <td>${Math.floor(Math.random() * 20) + 1000}</td>  <!-- 气压 -->
+                    <td>${(Math.random() * 25).toFixed(1)}</td>        <!-- 降水量 -->
+                    <td>${(Math.random() * 6 + 0.5).toFixed(1)}</td>   <!-- 风速 -->
+                </tr>
+                `;
+            }
+
+            tableBody.innerHTML = html;
+        } catch (error) {
+            tableBody.innerHTML = '<tr><td colspan="12" class="text-center text-danger">加载数据失败，请重试</td></tr>';
+            console.error('查询历史数据失败:', error);
+        }
+    }, 800);
+}
+</script>
+{% endblock %}

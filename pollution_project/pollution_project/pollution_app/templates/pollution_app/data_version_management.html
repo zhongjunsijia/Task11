@@ -1,0 +1,76 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ page_title }}</h2>
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title">数据版本列表</h5>
+                <a href="{% url 'create_data_version_view' %}" class="btn btn-primary">创建新版本</a>
+            </div>
+            
+            {% if messages %}
+            <div class="alert alert-info">
+                {% for message in messages %}
+                <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if versions %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>版本名称</th>
+                            <th>描述</th>
+                            <th>数据条数</th>
+                            <th>上传用户</th>
+                            <th>创建时间</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for version in versions %}
+                        <tr>
+                            <td>{{ version.id }}</td>
+                            <td>{{ version.version_name }}</td>
+                            <td>{{ version.description|default:'无' }}</td>
+                            <td>{{ version.data_count }}</td>
+                            <td>{{ version.upload_user.username|default:'系统' }}</td>
+                            <td>{{ version.created_at|date:'Y-m-d H:i' }}</td>
+                            <td>
+                                {% if version.is_active %}
+                                <span class="badge bg-success">激活</span>
+                                {% else %}
+                                <span class="badge bg-secondary">未激活</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'view_version_data' version.id %}" class="btn btn-sm btn-info">查看</a>
+                                    {% if not version.is_active %}
+                                    <a href="{% url 'activate_data_version' version.id %}" class="btn btn-sm btn-success">激活</a>
+                                    {% endif %}
+                                    <a href="{% url 'delete_data_version' version.id %}" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除这个数据版本吗？');">删除</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                暂无数据版本，请点击上方按钮创建新版本。
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

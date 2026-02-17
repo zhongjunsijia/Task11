@@ -1,0 +1,1459 @@
+{
+  "generated_at": "2026-02-17 15:35:52",
+  "model_comparison": {
+    "pm25": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "test_r2": -8.012162350774805,
+        "test_rmse": 13.959422639551695,
+        "test_mae": 13.909448817139118,
+        "training_time": 7.449046850204468,
+        "is_active": true,
+        "created_at": "2026-02-17 07:35:25"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "test_r2": -1.8544884721794452,
+        "test_rmse": 7.856282644463609,
+        "test_mae": 6.798883489791905,
+        "training_time": 0.10468339920043945,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "test_r2": -1.1505031701097512,
+        "test_rmse": 6.819036207243524,
+        "test_mae": 6.681202690839555,
+        "training_time": 1.6086809635162354,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:09"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "test_r2": -3.483723155610572,
+        "test_rmse": 9.846283762526332,
+        "test_mae": 8.679101562499984,
+        "training_time": 2.7084388732910156,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:49"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "test_r2": -2.1197455400602907,
+        "test_rmse": 8.21320266034838,
+        "test_mae": 7.895271830233948,
+        "training_time": 0.05653858184814453,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "test_r2": -1.7479116860662378,
+        "test_rmse": 7.7082242074272385,
+        "test_mae": 6.451404516580496,
+        "training_time": 0.06255483627319336,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "test_r2": -2.359715195916085,
+        "test_rmse": 8.52322954188702,
+        "test_mae": 8.14597363643782,
+        "training_time": 0.0032777786254882812,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "test_r2": -11.871016402837299,
+        "test_rmse": 16.682432441653997,
+        "test_mae": 16.650077766359693,
+        "training_time": 8.877516984939575,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:48"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "test_r2": -1.8544884721794452,
+        "test_rmse": 7.856282644463609,
+        "test_mae": 6.798883489791905,
+        "training_time": 0.08103132247924805,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "test_r2": -0.39677556985538165,
+        "test_rmse": 5.495614593400634,
+        "test_mae": 5.255389996414795,
+        "training_time": 1.258535623550415,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:31"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "test_r2": -3.9770156396360257,
+        "test_rmse": 10.373790082126689,
+        "test_mae": 9.273242187500014,
+        "training_time": 2.809600353240967,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:15"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "test_r2": -2.1197455400602907,
+        "test_rmse": 8.21320266034838,
+        "test_mae": 7.895271830233948,
+        "training_time": 0.061315059661865234,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "test_r2": -1.7479116860662378,
+        "test_rmse": 7.7082242074272385,
+        "test_mae": 6.451404516580496,
+        "training_time": 0.06692767143249512,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "test_r2": -2.359715195916085,
+        "test_rmse": 8.52322954188702,
+        "test_mae": 8.14597363643782,
+        "training_time": 0.009238004684448242,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "pm10": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "test_r2": -10.60835128246269,
+        "test_rmse": 18.22800138748865,
+        "test_mae": 17.803610781701536,
+        "training_time": 8.624465942382812,
+        "is_active": true,
+        "created_at": "2026-02-17 07:35:34"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "test_r2": -1.9594820369233736,
+        "test_rmse": 9.2036826652074,
+        "test_mae": 7.922245448168983,
+        "training_time": 0.09621238708496094,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "test_r2": -1.1114629530237385,
+        "test_rmse": 7.7740175181769375,
+        "test_mae": 7.653029670738174,
+        "training_time": 1.3962178230285645,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:11"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "test_r2": -4.182078753093288,
+        "test_rmse": 12.178836114769446,
+        "test_mae": 10.940820312499998,
+        "training_time": 3.334716320037842,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:53"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "test_r2": -2.6618840181302255,
+        "test_rmse": 10.237786641112047,
+        "test_mae": 10.057921117930075,
+        "training_time": 0.0749814510345459,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "test_r2": -2.2794448299507497,
+        "test_rmse": 9.688442064917623,
+        "test_mae": 7.888932639182595,
+        "training_time": 0.06077289581298828,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "test_r2": -2.992164389313441,
+        "test_rmse": 10.689514733285318,
+        "test_mae": 10.251113142923973,
+        "training_time": 0.0030133724212646484,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "test_r2": -11.567644835185916,
+        "test_rmse": 18.966217711897873,
+        "test_mae": 18.886925278249052,
+        "training_time": 8.98409914970398,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:58"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "test_r2": -1.9594820369233736,
+        "test_rmse": 9.2036826652074,
+        "test_mae": 7.922245448168983,
+        "training_time": 0.08185315132141113,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "test_r2": -0.5068251356732216,
+        "test_rmse": 6.5672751157391565,
+        "test_mae": 6.554771026330126,
+        "training_time": 1.3227295875549316,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:32"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "test_r2": -4.15435234054499,
+        "test_rmse": 12.146211337995435,
+        "test_mae": 10.904492187500015,
+        "training_time": 2.9580821990966797,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:18"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "test_r2": -2.6618840181302255,
+        "test_rmse": 10.237786641112047,
+        "test_mae": 10.057921117930075,
+        "training_time": 0.06349515914916992,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "test_r2": -2.2794448299507497,
+        "test_rmse": 9.688442064917623,
+        "test_mae": 7.888932639182595,
+        "training_time": 0.06473779678344727,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "test_r2": -2.992164389313441,
+        "test_rmse": 10.689514733285318,
+        "test_mae": 10.251113142923973,
+        "training_time": 0.003143310546875,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "no2": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "test_r2": -5.205201563217123,
+        "test_rmse": 6.850316549023811,
+        "test_mae": 6.402379424635875,
+        "training_time": 5.9062886238098145,
+        "is_active": true,
+        "created_at": "2026-02-17 07:35:40"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "test_r2": -1.5753281354763722,
+        "test_rmse": 4.413152957301624,
+        "test_mae": 4.177562827065344,
+        "training_time": 0.08598041534423828,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "test_r2": -0.5670046242791109,
+        "test_rmse": 3.442451520517141,
+        "test_mae": 3.281802965358171,
+        "training_time": 1.3716387748718262,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:12"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "test_r2": -0.01335272166354673,
+        "test_rmse": 2.7682991091246936,
+        "test_mae": 2.75,
+        "training_time": 3.832831382751465,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:57"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "test_r2": 0.721206513416377,
+        "test_rmse": 1.4520247044346901,
+        "test_mae": 1.3904424353173255,
+        "training_time": 0.07177472114562988,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "test_r2": 0.6965532575399591,
+        "test_rmse": 1.5148650071389393,
+        "test_mae": 1.4959384658990178,
+        "training_time": 0.05823850631713867,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "test_r2": -1.8408160814657069,
+        "test_rmse": 4.6350481783994875,
+        "test_mae": 4.59299455706658,
+        "training_time": 0.002781391143798828,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "test_r2": -3.914718806375242,
+        "test_rmse": 6.09652039881872,
+        "test_mae": 5.15364635154422,
+        "training_time": 6.362965106964111,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:04"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "test_r2": -1.5753281354763722,
+        "test_rmse": 4.413152957301624,
+        "test_mae": 4.177562827065344,
+        "training_time": 0.0902400016784668,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "test_r2": -0.7003298608248436,
+        "test_rmse": 3.585909169581388,
+        "test_mae": 3.4111241631231675,
+        "training_time": 1.6526460647583008,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:34"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "test_r2": -0.021364140786416685,
+        "test_rmse": 2.7792204508993663,
+        "test_mae": 2.75,
+        "training_time": 2.871779441833496,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:21"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "test_r2": 0.721206513416377,
+        "test_rmse": 1.4520247044346901,
+        "test_mae": 1.3904424353173255,
+        "training_time": 0.06025552749633789,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:12"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "test_r2": 0.6965532575399591,
+        "test_rmse": 1.5148650071389393,
+        "test_mae": 1.4959384658990178,
+        "training_time": 0.06458878517150879,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "test_r2": -1.8408160814657069,
+        "test_rmse": 4.6350481783994875,
+        "test_mae": 4.59299455706658,
+        "training_time": 0.0027446746826171875,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "so2": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "test_r2": -3.772619730336123,
+        "test_rmse": 2.075400998994735,
+        "test_mae": 1.8950896141348914,
+        "training_time": 4.0076799392700195,
+        "is_active": true,
+        "created_at": "2026-02-17 07:35:44"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "test_r2": -2.039328202235635,
+        "test_rmse": 1.656198569772857,
+        "test_mae": 1.6226006108494415,
+        "training_time": 0.08665060997009277,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "test_r2": -0.3265094857569961,
+        "test_rmse": 1.0941548386291984,
+        "test_mae": 1.0631207304347612,
+        "training_time": 1.631035566329956,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:14"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "test_r2": -0.005207473881687186,
+        "test_rmse": 0.9524703382143831,
+        "test_mae": 0.9499999999999993,
+        "training_time": 3.6021971702575684,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:00"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "test_r2": -0.0006925207756232066,
+        "test_rmse": 0.9503288904374099,
+        "test_mae": 0.9499999999999993,
+        "training_time": 0.05913567543029785,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:47"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "test_r2": 0.584743181011979,
+        "test_rmse": 0.6121840239149404,
+        "test_mae": 0.5820967182588994,
+        "training_time": 0.05841422080993652,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "test_r2": -0.44985694233314155,
+        "test_rmse": 1.1438950522035045,
+        "test_mae": 1.143712196332511,
+        "training_time": 0.002868175506591797,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "test_r2": -3.025219284344997,
+        "test_rmse": 1.9059801688688565,
+        "test_mae": 1.8410031927932824,
+        "training_time": 3.9968106746673584,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:08"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "test_r2": -2.039328202235635,
+        "test_rmse": 1.656198569772857,
+        "test_mae": 1.6226006108494415,
+        "training_time": 0.08168959617614746,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "test_r2": -0.36180778879731856,
+        "test_rmse": 1.108616944390432,
+        "test_mae": 1.0672467704632158,
+        "training_time": 1.7674403190612793,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:35"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "test_r2": -0.030395169667589705,
+        "test_rmse": 0.9643296327630911,
+        "test_mae": 0.9499999999999993,
+        "training_time": 3.0366785526275635,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:24"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "test_r2": -0.0006925207756232066,
+        "test_rmse": 0.9503288904374099,
+        "test_mae": 0.9499999999999993,
+        "training_time": 0.059966087341308594,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:12"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "test_r2": 0.584743181011979,
+        "test_rmse": 0.6121840239149404,
+        "test_mae": 0.5820967182588994,
+        "training_time": 0.06097745895385742,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "test_r2": -0.44985694233314155,
+        "test_rmse": 1.1438950522035045,
+        "test_mae": 1.143712196332511,
+        "training_time": 0.005011558532714844,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "o3": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "test_r2": -540.572939997437,
+        "test_rmse": 10.472273886290521,
+        "test_mae": 9.90411843096134,
+        "training_time": 7.467932462692261,
+        "is_active": true,
+        "created_at": "2026-02-17 07:35:51"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "test_r2": -59.84345627514562,
+        "test_rmse": 3.5100996988286735,
+        "test_mae": 3.1397943933060937,
+        "training_time": 0.09811282157897949,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:18"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "test_r2": -78.78737396606515,
+        "test_rmse": 4.019570030255524,
+        "test_mae": 3.9989118359073927,
+        "training_time": 1.4530863761901855,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:15"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "test_r2": -327.650851967891,
+        "test_rmse": 8.157928506888178,
+        "test_mae": 8.145507812500014,
+        "training_time": 3.789188861846924,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:04"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "test_r2": -24.199100377846054,
+        "test_rmse": 2.2589417492520454,
+        "test_mae": 2.0414244654987,
+        "training_time": 0.05841970443725586,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:47"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "test_r2": -46.59706055661769,
+        "test_rmse": 3.1045780329563635,
+        "test_mae": 3.100290905264508,
+        "training_time": 0.05637407302856445,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "test_r2": -53.29730999455583,
+        "test_rmse": 3.315901879413457,
+        "test_mae": 2.6254727032865404,
+        "training_time": 0.0028510093688964844,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "test_r2": -559.8752499984585,
+        "test_rmse": 10.65726222463768,
+        "test_mae": 9.957825945661405,
+        "training_time": 8.635159492492676,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:17"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "test_r2": -59.84345627514562,
+        "test_rmse": 3.5100996988286735,
+        "test_mae": 3.1397943933060937,
+        "training_time": 0.09866833686828613,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "test_r2": -83.31523597729817,
+        "test_rmse": 4.132049768021084,
+        "test_mae": 4.129867223554619,
+        "training_time": 1.6572482585906982,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:37"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "test_r2": -457.94885423447766,
+        "test_rmse": 9.640391225592607,
+        "test_mae": 9.6298828125,
+        "training_time": 2.927854537963867,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:27"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "test_r2": -24.199100377846054,
+        "test_rmse": 2.2589417492520454,
+        "test_mae": 2.0414244654987,
+        "training_time": 0.06206512451171875,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:12"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "test_r2": -46.59706055661769,
+        "test_rmse": 3.1045780329563635,
+        "test_mae": 3.100290905264508,
+        "training_time": 0.06422901153564453,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "test_r2": -53.29730999455583,
+        "test_rmse": 3.315901879413457,
+        "test_mae": 2.6254727032865404,
+        "training_time": 0.0036323070526123047,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "co": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "test_r2": -2.450704461032865,
+        "test_rmse": 0.18576071869566138,
+        "test_mae": 0.1780888438770168,
+        "training_time": 0.8596813678741455,
+        "is_active": true,
+        "created_at": "2026-02-17 07:35:52"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "test_r2": 0.6528225018676992,
+        "test_rmse": 0.05892177001179621,
+        "test_mae": 0.05669847233293779,
+        "training_time": 0.08388996124267578,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:18"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "test_r2": -1.8251883493469734e-07,
+        "test_rmse": 0.1000000091259413,
+        "test_mae": 0.09999999999999998,
+        "training_time": 1.411132574081421,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "test_r2": -0.005508422851562722,
+        "test_rmse": 0.10027504289959502,
+        "test_mae": 0.09999999999999998,
+        "training_time": 3.5813419818878174,
+        "is_active": false,
+        "created_at": "2026-02-17 07:35:08"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "test_r2": -0.015625,
+        "test_rmse": 0.10077822185373185,
+        "test_mae": 0.09999999999999998,
+        "training_time": 0.05441451072692871,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:47"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "test_r2": 0.6725336087481174,
+        "test_rmse": 0.057224679226001995,
+        "test_mae": 0.05716241110227277,
+        "training_time": 0.060534000396728516,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "test_r2": 0.4275517501340713,
+        "test_rmse": 0.07566030992970676,
+        "test_mae": 0.07554369478711506,
+        "training_time": 0.0028107166290283203,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "test_r2": -5.28789620527551,
+        "test_rmse": 0.25075677867757645,
+        "test_mae": 0.22583961114923687,
+        "training_time": 0.7027459144592285,
+        "is_active": false,
+        "created_at": "2026-02-17 07:34:17"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "test_r2": 0.6528225018676992,
+        "test_rmse": 0.05892177001179621,
+        "test_mae": 0.05669847233293779,
+        "training_time": 0.09457921981811523,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:40"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "test_r2": -1.8251883493469734e-07,
+        "test_rmse": 0.1000000091259413,
+        "test_mae": 0.09999999999999998,
+        "training_time": 1.64607572555542,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "test_r2": -0.02145767211914107,
+        "test_rmse": 0.10106718914262633,
+        "test_mae": 0.09999999999999998,
+        "training_time": 2.7992990016937256,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:29"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "test_r2": -0.015625,
+        "test_rmse": 0.10077822185373185,
+        "test_mae": 0.09999999999999998,
+        "training_time": 0.05993008613586426,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:12"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "test_r2": 0.6725336087481174,
+        "test_rmse": 0.057224679226001995,
+        "test_mae": 0.05716241110227277,
+        "training_time": 0.06141495704650879,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "test_r2": 0.4275517501340713,
+        "test_rmse": 0.07566030992970676,
+        "test_mae": 0.07554369478711506,
+        "training_time": 0.004061460494995117,
+        "is_active": false,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ]
+  },
+  "detailed_results": {
+    "pm25": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "is_active": true,
+        "test_r2": -8.012162350774805,
+        "created_at": "2026-02-17 07:35:25"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -1.8544884721794452,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -1.1505031701097512,
+        "created_at": "2026-02-17 07:35:09"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -3.483723155610572,
+        "created_at": "2026-02-17 07:34:49"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -2.1197455400602907,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": -1.7479116860662378,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -2.359715195916085,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "is_active": false,
+        "test_r2": -11.871016402837299,
+        "created_at": "2026-02-17 07:33:48"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -1.8544884721794452,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -0.39677556985538165,
+        "created_at": "2026-02-17 07:33:31"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -3.9770156396360257,
+        "created_at": "2026-02-17 07:33:15"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -2.1197455400602907,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": -1.7479116860662378,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -2.359715195916085,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "pm10": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "is_active": true,
+        "test_r2": -10.60835128246269,
+        "created_at": "2026-02-17 07:35:34"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -1.9594820369233736,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -1.1114629530237385,
+        "created_at": "2026-02-17 07:35:11"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -4.182078753093288,
+        "created_at": "2026-02-17 07:34:53"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -2.6618840181302255,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": -2.2794448299507497,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -2.992164389313441,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "is_active": false,
+        "test_r2": -11.567644835185916,
+        "created_at": "2026-02-17 07:33:58"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -1.9594820369233736,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -0.5068251356732216,
+        "created_at": "2026-02-17 07:33:32"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -4.15435234054499,
+        "created_at": "2026-02-17 07:33:18"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -2.6618840181302255,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": -2.2794448299507497,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -2.992164389313441,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "no2": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "is_active": true,
+        "test_r2": -5.205201563217123,
+        "created_at": "2026-02-17 07:35:40"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -1.5753281354763722,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -0.5670046242791109,
+        "created_at": "2026-02-17 07:35:12"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -0.01335272166354673,
+        "created_at": "2026-02-17 07:34:57"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": 0.721206513416377,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": 0.6965532575399591,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -1.8408160814657069,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "is_active": false,
+        "test_r2": -3.914718806375242,
+        "created_at": "2026-02-17 07:34:04"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -1.5753281354763722,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -0.7003298608248436,
+        "created_at": "2026-02-17 07:33:34"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -0.021364140786416685,
+        "created_at": "2026-02-17 07:33:21"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": 0.721206513416377,
+        "created_at": "2026-02-17 07:33:12"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": 0.6965532575399591,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -1.8408160814657069,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "so2": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "is_active": true,
+        "test_r2": -3.772619730336123,
+        "created_at": "2026-02-17 07:35:44"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -2.039328202235635,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -0.3265094857569961,
+        "created_at": "2026-02-17 07:35:14"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -0.005207473881687186,
+        "created_at": "2026-02-17 07:35:00"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -0.0006925207756232066,
+        "created_at": "2026-02-17 07:34:47"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": 0.584743181011979,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -0.44985694233314155,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "is_active": false,
+        "test_r2": -3.025219284344997,
+        "created_at": "2026-02-17 07:34:08"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -2.039328202235635,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -0.36180778879731856,
+        "created_at": "2026-02-17 07:33:35"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -0.030395169667589705,
+        "created_at": "2026-02-17 07:33:24"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -0.0006925207756232066,
+        "created_at": "2026-02-17 07:33:12"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": 0.584743181011979,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -0.44985694233314155,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "o3": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "is_active": true,
+        "test_r2": -540.572939997437,
+        "created_at": "2026-02-17 07:35:51"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -59.84345627514562,
+        "created_at": "2026-02-17 07:35:18"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -78.78737396606515,
+        "created_at": "2026-02-17 07:35:15"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -327.650851967891,
+        "created_at": "2026-02-17 07:35:04"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -24.199100377846054,
+        "created_at": "2026-02-17 07:34:47"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": -46.59706055661769,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -53.29730999455583,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "is_active": false,
+        "test_r2": -559.8752499984585,
+        "created_at": "2026-02-17 07:34:17"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": -59.84345627514562,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -83.31523597729817,
+        "created_at": "2026-02-17 07:33:37"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -457.94885423447766,
+        "created_at": "2026-02-17 07:33:27"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -24.199100377846054,
+        "created_at": "2026-02-17 07:33:12"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": -46.59706055661769,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": -53.29730999455583,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ],
+    "co": [
+      {
+        "version": "v2.3",
+        "model_type": "mlp",
+        "is_active": true,
+        "test_r2": -2.450704461032865,
+        "created_at": "2026-02-17 07:35:52"
+      },
+      {
+        "version": "v2.2",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": 0.6528225018676992,
+        "created_at": "2026-02-17 07:35:18"
+      },
+      {
+        "version": "v2.1",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -1.8251883493469734e-07,
+        "created_at": "2026-02-17 07:35:17"
+      },
+      {
+        "version": "v2.0",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -0.005508422851562722,
+        "created_at": "2026-02-17 07:35:08"
+      },
+      {
+        "version": "v1.9",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -0.015625,
+        "created_at": "2026-02-17 07:34:47"
+      },
+      {
+        "version": "v1.8",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": 0.6725336087481174,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.7",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": 0.4275517501340713,
+        "created_at": "2026-02-17 07:34:46"
+      },
+      {
+        "version": "v1.6",
+        "model_type": "mlp",
+        "is_active": false,
+        "test_r2": -5.28789620527551,
+        "created_at": "2026-02-17 07:34:17"
+      },
+      {
+        "version": "v1.5",
+        "model_type": "svr",
+        "is_active": false,
+        "test_r2": 0.6528225018676992,
+        "created_at": "2026-02-17 07:33:40"
+      },
+      {
+        "version": "v1.4",
+        "model_type": "gb",
+        "is_active": false,
+        "test_r2": -1.8251883493469734e-07,
+        "created_at": "2026-02-17 07:33:39"
+      },
+      {
+        "version": "v1.3",
+        "model_type": "rf",
+        "is_active": false,
+        "test_r2": -0.02145767211914107,
+        "created_at": "2026-02-17 07:33:29"
+      },
+      {
+        "version": "v1.2",
+        "model_type": "lasso",
+        "is_active": false,
+        "test_r2": -0.015625,
+        "created_at": "2026-02-17 07:33:12"
+      },
+      {
+        "version": "v1.1",
+        "model_type": "ridge",
+        "is_active": false,
+        "test_r2": 0.6725336087481174,
+        "created_at": "2026-02-17 07:33:11"
+      },
+      {
+        "version": "v1.0",
+        "model_type": "linear",
+        "is_active": false,
+        "test_r2": 0.4275517501340713,
+        "created_at": "2026-02-17 07:33:11"
+      }
+    ]
+  }
+}

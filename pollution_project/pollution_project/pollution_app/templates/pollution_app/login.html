@@ -1,0 +1,84 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}登录 - 气象污染预测系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container { max-width: 400px; margin: 80px auto; padding: 20px; position: relative;z-index: 2;}
+    .card { box-shadow: 0 6px 15px rgba(0,0,0,0.15);background-color: rgba(255, 255, 255, 0.92);border: none;border-radius: 10px;}
+    /* 添加背景图样式 */
+    body {
+        /* 气象相关背景图（可替换为本地图片） */
+        background-image: url('https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?ixlib=rb-4.0.3');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+    /* 半透明遮罩增强可读性 */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        z-index: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container login-container">
+    <div class="card">
+        <div class="card-header bg-primary text-white text-center">
+            <h3>用户登录</h3>
+        </div>
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">用户名</label>
+                    {{ form.username.errors }}
+                    <input type="text"
+                           name="{{ form.username.name }}"
+                           id="{{ form.username.id_for_label }}"
+                           class="form-control"
+                           placeholder="请输入用户名"
+                           required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.password.id_for_label }}" class="form-label">密码</label>
+                    {{ form.password.errors }}
+                    <input type="password"
+                           name="{{ form.password.name }}"
+                           id="{{ form.password.id_for_label }}"
+                           class="form-control"
+                           placeholder="请输入密码"
+                           required>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">登录</button>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer text-center">
+            <p>还没有账号？<a href="{% url 'register' %}">立即注册</a></p>
+            <!-- 返回首页 -->
+            <a href="{% url 'index' %}" class="btn btn-outline-secondary mt-2">返回首页</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

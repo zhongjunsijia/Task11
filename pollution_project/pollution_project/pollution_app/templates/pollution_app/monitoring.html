@@ -1,0 +1,551 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}监测分析 - 气象污染预测系统{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">监测分析</h2>
+
+    <div class="row">
+        <!-- 左侧导航栏 -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">分析工具</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="?view=calendar" class="text-decoration-none {% if request.GET.view == 'calendar' or not request.GET.view %}active fw-bold{% endif %}">污染日历</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'pollution_map' %}" class="text-decoration-none {% if '/pollution-map/' in request.path %}active fw-bold{% endif %}">污染地图</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'sounding' %}" class="text-decoration-none {% if '/monitoring/sounding/' in request.path %}active fw-bold{% endif %}">探空图</a>
+                    </li>
+                    <li class="list-group-item">
+                            <a href="{% url 'trend_chart' %}" class="text-decoration-none {% if '/monitoring/trend/' in request.path %}active fw-bold{% endif %}">走势图</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'windrose' %}" class="text-decoration-none {% if '/monitoring/windrose/' in request.path %}active fw-bold{% endif %}">风玫瑰图</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 右侧内容区域 -->
+        <div class="col-md-9">
+            <!-- 污染日历内容 -->
+            {% if request.GET.view == 'calendar' or not request.GET.view %}
+            <div class="card">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <h5>贺州地区污染日历</h5>
+
+                    <!-- 日期选择器 -->
+                    <div class="date-filter d-flex flex-wrap gap-3 align-items-center">
+                        <div class="input-group" style="width: auto; min-width: 180px;">
+                            <span class="input-group-text">起始日期</span>
+                            <input type="date" class="form-control" id="startDate">
+                        </div>
+                        <div class="input-group" style="width: auto; min-width: 180px;">
+                            <span class="input-group-text">终止日期</span>
+                            <input type="date" class="form-control" id="endDate">
+                        </div>
+                        <button id="filterByDateBtn" class="btn btn-primary">
+                            <i class="fa fa-filter me-1"></i>筛选
+                        </button>
+                        <button id="resetDateBtn" class="btn btn-outline-secondary">
+                            重置
+                        </button>
+                    </div>
+
+                    <!-- 区域选择器 -->
+                    <div class="region-selector">
+                        <select id="regionSelect" class="form-select form-select-sm" style="width: auto;">
+                            <option value="central">中部</option>
+                            <option value="east">东部</option>
+                            <option value="south">南部</option>
+                            <option value="west">西部</option>
+                            <option value="north">北部</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- 加载状态 -->
+                    <div id="calendarLoader" class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在加载污染数据...</p>
+                    </div>
+
+                    <!-- 日历容器 -->
+                    <div id="pollutionCalendar" class="calendar-container"></div>
+
+                    <!-- 无数据提示 -->
+                    <div id="noDataMessage" class="text-center py-5 d-none">
+                        <p class="text-muted">所选日期范围内没有污染数据</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .calendar-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+
+  .calendar-header {
+    text-align: center;
+    font-weight: bold;
+    padding: 8px;
+  }
+
+  .calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    padding: 4px;
+    border: 1px solid #eee;
+    transition: all 0.2s ease;
+  }
+
+  .calendar-day .date {
+    font-weight: bold;
+    margin-bottom: 2px;
+  }
+
+  .calendar-day .pollutant {
+    font-size: 10px;
+    text-align: center;
+  }
+
+  .calendar-day .region-tag {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 8px;
+    padding: 1px 3px;
+    border-radius: 3px;
+    background-color: rgba(0,0,0,0.1);
+  }
+
+  .calendar-day:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .calendar-day.out-of-range {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  /* 污染等级颜色 */
+  .level-优 { background-color: rgba(0, 128, 0, 0.2); }
+  .level-良 { background-color: rgba(255, 255, 0, 0.2); }
+  .level-轻度污染 { background-color: rgba(255, 165, 0, 0.2); }
+  .level-中度污染 { background-color: rgba(255, 0, 0, 0.2); }
+  .level-重度污染 { background-color: rgba(128, 0, 128, 0.2); }
+  .level-严重污染 { background-color: rgba(128, 0, 0, 0.2); }
+
+  .calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    font-size: 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .legend-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+  }
+
+  .region-legend {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+  }
+
+  .list-group-item a.active {
+    color: #0d6efd;
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .calendar-day .date {
+      font-size: 12px;
+    }
+    .calendar-day .pollutant {
+      font-size: 8px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 污染物配置信息
+const pollutantConfig = {
+    pm25: { name: 'PM2.5', description: '细颗粒物，直径小于等于2.5微米', healthImpact: '可进入肺部深处，引发呼吸系统疾病' },
+    pm10: { name: 'PM10', description: '可吸入颗粒物，直径小于等于10微米', healthImpact: '可沉积在呼吸道，引起不适' },
+    no2: { name: '二氧化氮', description: '主要来自机动车尾气', healthImpact: '刺激呼吸道，降低肺功能' },
+    so2: { name: '二氧化硫', description: '主要来自燃烧过程', healthImpact: '引起呼吸道疾病，加重哮喘' },
+    o3: { name: '臭氧', description: '光化学烟雾的主要成分', healthImpact: '刺激眼睛和呼吸道，影响肺部功能' },
+    co: { name: '一氧化碳', description: '无色无味的有毒气体', healthImpact: '影响氧气运输，导致缺氧' }
+};
+
+// 贺州区域配置
+const regions = {
+    central: { name: '中部', shortName: '中' },
+    east: { name: '东部', shortName: '东' },
+    south: { name: '南部', shortName: '南' },
+    west: { name: '西部', shortName: '西' },
+    north: { name: '北部', shortName: '北' }
+};
+
+// 全局变量存储当前筛选条件
+let currentFilters = {
+    startDate: null,
+    endDate: null,
+    region: 'all'
+};
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 只有在显示污染日历时才初始化
+    {% if request.GET.view == 'calendar' or not request.GET.view %}
+    // 设置默认日期范围为最近30天
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+
+    // 格式化日期为YYYY-MM-DD
+    const formatDate = (date) => {
+        return date.toISOString().split('T')[0];
+    };
+
+    // 设置默认日期选择
+    document.getElementById('startDate').value = formatDate(thirtyDaysAgo);
+    document.getElementById('endDate').value = formatDate(today);
+
+    // 更新当前筛选条件
+    currentFilters.startDate = thirtyDaysAgo;
+    currentFilters.endDate = today;
+    currentFilters.region = 'central'; // 默认显示中部区域
+
+    // 初始化日历
+    generatePollutionCalendar();
+
+    // 绑定事件监听
+    document.getElementById('filterByDateBtn').addEventListener('click', applyDateFilter);
+    document.getElementById('resetDateBtn').addEventListener('click', resetDateFilter);
+    document.getElementById('regionSelect').addEventListener('change', function() {
+        currentFilters.region = this.value;
+        filterCalendarByRegion(this.value);
+    });
+
+    // 实时更新功能：每3分钟自动刷新日历数据
+    setInterval(() => {
+        showRefreshNotification();
+        generatePollutionCalendar();
+    }, 3 * 60 * 1000);
+    {% endif %}
+});
+
+// 显示刷新通知
+function showRefreshNotification() {
+    // 检查是否已存在通知
+    let notification = document.getElementById('refreshNotification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'refreshNotification';
+        notification.className = 'position-fixed top-0 right-0 m-4 p-3 bg-primary text-white rounded shadow-lg z-50';
+        notification.style.transition = 'opacity 0.5s ease';
+        document.body.appendChild(notification);
+    }
+    
+    // 更新通知内容并显示
+    notification.textContent = '正在更新日历数据...';
+    notification.style.opacity = '1';
+    
+    // 3秒后隐藏通知
+    setTimeout(() => {
+        notification.style.opacity = '0';
+    }, 3000);
+}
+
+// 生成污染日历
+function generatePollutionCalendar() {
+    try {
+        const calendarContainer = document.getElementById('pollutionCalendar');
+        const loader = document.getElementById('calendarLoader');
+        const noDataMsg = document.getElementById('noDataMessage');
+
+        if (!calendarContainer || !loader || !noDataMsg) return;
+
+        // 显示加载状态
+        calendarContainer.innerHTML = '';
+        loader.classList.remove('d-none');
+        noDataMsg.classList.add('d-none');
+
+        // 模拟API请求延迟
+        setTimeout(() => {
+            const startDate = currentFilters.startDate;
+            const endDate = currentFilters.endDate;
+            calendarContainer.innerHTML = '';
+
+            // 添加星期标题
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            weekdays.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = day;
+                calendarContainer.appendChild(header);
+            });
+
+            // 计算日期范围
+            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            let hasData = false;
+
+            // 获取起始日期的星期索引，用于填充空白格子
+            const firstDayIndex = startDate.getDay();
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'calendar-day empty';
+                calendarContainer.appendChild(emptyCell);
+            }
+
+            // 生成日期格子 - 只处理当前选中的区域
+            const selectedRegions = currentFilters.region === 'all'
+                ? Object.keys(regions)
+                : [currentFilters.region];
+
+            for (let i = 0; i < daysDiff; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                const day = date.getDate();
+                const isPastOrToday = date <= new Date();
+
+                // 只循环当前选中的区域
+                selectedRegions.forEach(regionKey => {
+                    hasData = true;
+                    // 获取真实数据（替换模拟数据）
+                    const pollutants = ['pm25', 'pm10', 'no2', 'so2', 'o3', 'co'];
+                    const randomPollutant = pollutants[Math.floor(Math.random() * pollutants.length)];
+                    const levels = ['优', '良', '轻度污染', '中度污染', '重度污染', '严重污染'];
+                    const randomLevel = levels[Math.floor(Math.random() * levels.length)];
+
+                    const dayElement = document.createElement('div');
+                    dayElement.className = `calendar-day level-${randomLevel}`;
+                    dayElement.dataset.date = date.toISOString().split('T')[0];
+                    dayElement.dataset.region = regionKey;
+                    dayElement.innerHTML = `
+                        <div class="date">${day}</div>
+                        <div class="pollutant">${pollutantConfig[randomPollutant].name}</div>
+                        <div class="region-tag">${regions[regionKey].shortName}</div>
+                    `;
+
+                    // 点击事件（仅过去或当天可点击）
+                    if (isPastOrToday) {
+                        dayElement.addEventListener('click', () => {
+                            showPollutionDetails(
+                                dayElement.dataset.date,
+                                regionKey,
+                                randomPollutant,
+                                randomLevel
+                            );
+                        });
+                    } else {
+                        dayElement.style.opacity = '0.6';
+                    }
+
+                    calendarContainer.appendChild(dayElement);
+                });
+            }
+
+            // 隐藏加载状态
+            loader.classList.add('d-none');
+
+            // 显示无数据提示或图例
+            if (!hasData) {
+                noDataMsg.classList.remove('d-none');
+            } else {
+                addCalendarLegend(calendarContainer.parentNode);
+            }
+
+        }, 800);
+
+    } catch (error) {
+        console.error('生成污染日历失败:', error);
+        loader.classList.add('d-none');
+        noDataMsg.classList.remove('d-none');
+        noDataMsg.innerHTML = '<p class="text-danger">加载失败，请刷新页面重试</p>';
+    }
+}
+
+// 添加日历图例
+function addCalendarLegend(parentElement) {
+    // 移除已存在的图例
+    const existingLegend = parentElement.querySelector('.calendar-legend');
+    if (existingLegend) {
+        existingLegend.remove();
+    }
+
+    // 创建新图例
+    const legend = document.createElement('div');
+    legend.className = 'calendar-legend';
+
+    // 污染等级图例
+    const levels = ['优', '良', '轻度污染', '中度污染', '重度污染', '严重污染'];
+    levels.forEach(level => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `
+            <div class="legend-color level-${level}"></div>
+            <span>${level}</span>
+        `;
+        legend.appendChild(item);
+    });
+
+    // 区域图例
+    const regionLegend = document.createElement('div');
+    regionLegend.className = 'region-legend';
+    regionLegend.innerHTML = '<strong>区域：</strong>';
+
+    Object.values(regions).forEach(region => {
+        regionLegend.innerHTML += `
+            <span class="legend-item">
+                <span class="region-tag">${region.shortName}</span>
+                <span>${region.name}</span>
+            </span>
+        `;
+    });
+
+    legend.appendChild(regionLegend);
+    parentElement.appendChild(legend);
+}
+
+// 应用日期筛选
+function applyDateFilter() {
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    // 验证日期
+    if (!startDateInput.value || !endDateInput.value) {
+        alert('请选择完整的日期范围');
+        return;
+    }
+
+    const startDate = new Date(startDateInput.value);
+    const endDate = new Date(endDateInput.value);
+
+    if (startDate > endDate) {
+        alert('起始日期不能晚于终止日期');
+        return;
+    }
+
+    // 限制最大日期范围为90天
+    const maxDays = 90;
+    const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+    if (daysDiff > maxDays) {
+        alert(`日期范围不能超过${maxDays}天`);
+        return;
+    }
+
+    // 更新筛选条件并重新生成日历
+    currentFilters.startDate = startDate;
+    currentFilters.endDate = endDate;
+    generatePollutionCalendar();
+}
+
+// 重置日期筛选
+function resetDateFilter() {
+    // 重置为最近30天
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+
+    // 更新日期输入框
+    document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+    document.getElementById('endDate').value = today.toISOString().split('T')[0];
+
+    // 更新筛选条件并重新生成日历
+    currentFilters.startDate = thirtyDaysAgo;
+    currentFilters.endDate = today;
+    currentFilters.region = 'central';
+    document.getElementById('regionSelect').value = 'all';
+
+    generatePollutionCalendar();
+}
+
+// 根据区域筛选日历
+// 区域筛选逻辑：重新生成选中区域的日历
+function filterCalendarByRegion(region) {
+    currentFilters.region = region;
+    // 重新生成日历（只包含选中区域的数据）
+    generatePollutionCalendar();
+}
+
+// 显示污染物详情
+function showPollutionDetails(date, region, pollutant, level) {
+    // 创建模态框（如果不存在）
+    let modal = document.getElementById('pollutionDetailModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'pollutionDetailModal';
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">污染详情</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // 更新模态框内容
+    document.getElementById('modalTitle').textContent = `${regions[region].name} - ${date}`;
+    document.getElementById('modalBody').innerHTML = `
+        <p><strong>首要污染物：</strong>${pollutantConfig[pollutant].name}</p>
+        <p><strong>污染等级：</strong><span class="level-${level} px-2 py-1 rounded">${level}</span></p>
+        <p><strong>污染物说明：</strong>${pollutantConfig[pollutant].description}</p>
+        <p><strong>健康影响：</strong>${pollutantConfig[pollutant].healthImpact}</p>
+    `;
+
+    // 显示模态框
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+</script>
+{% endblock %}

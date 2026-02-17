@@ -1,0 +1,109 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}注册 - 气象污染预测系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container { max-width: 500px; margin: 30px auto; padding: 20px;position: relative; z-index: 2; }
+    .card { box-shadow: 0 4px 8px rgba(0,0,0,0.1);background-color: rgba(255, 255, 255, 0.92);border: none;border-radius: 10px; }
+    /* 背景图样式 */
+    body {
+        background-image: url('https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?ixlib=rb-4.0.3');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+    /* 半透明遮罩*/
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        z-index: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container register-container">
+    <div class="card">
+        <div class="card-header bg-primary text-white text-center">
+            <h3>用户注册</h3>
+        </div>
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">用户名</label>
+                    {{ form.username.errors }}
+                    <input type="text"
+                           name="{{ form.username.name }}"
+                           id="{{ form.username.id_for_label }}"
+                           class="form-control"
+                           value="{{ form.username.value|default:'' }}"
+                           placeholder="请设置用户名"
+                           required>
+                    <small class="form-text text-muted">150个字符或更少。字母、数字和@/./+/-/_字符。</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">邮箱</label>
+                    {{ form.email.errors }}
+                    <input type="email"
+                           name="{{ form.email.name }}"
+                           id="{{ form.email.id_for_label }}"
+                           class="form-control"
+                           value="{{ form.email.value|default:'' }}"
+                           placeholder="请输入邮箱"
+                           required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">密码</label>
+                    {{ form.password1.errors }}
+                    <input type="password"
+                           name="{{ form.password1.name }}"
+                           id="{{ form.password1.id_for_label }}"
+                           class="form-control"
+                           placeholder="请设置密码"
+                           required>
+                    <small class="form-text text-muted">
+                        密码必须包含至少8个字符，且不能是纯数字。
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">确认密码</label>
+                    {{ form.password2.errors }}
+                    <input type="password"
+                           name="{{ form.password2.name }}"
+                           id="{{ form.password2.id_for_label }}"
+                           class="form-control"
+                           placeholder="请再次输入密码"
+                           required>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">注册</button>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer text-center">
+            <p>已有账号？<a href="{% url 'login' %}">立即登录</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

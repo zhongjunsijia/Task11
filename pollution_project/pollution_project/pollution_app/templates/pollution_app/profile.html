@@ -1,0 +1,46 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}个人信息 - 气象污染预测系统{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">个人信息修改</h3>
+        </div>
+        <div class="card-body">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            <!-- 用户名（不可修改，仅展示） -->
+            <div class="mb-3">
+              <label class="form-label">用户名</label>
+              <input type="text" class="form-control" value="{{ user.username }}" disabled>
+            </div>
+            <!-- 邮箱及其他字段 -->
+            <div class="mb-3">
+              <label for="{{ form.email.id_for_label }}" class="form-label">邮箱</label>
+              {{ form.email.errors }}
+              <input type="email"
+                     name="{{ form.email.name }}"
+                     id="{{ form.email.id_for_label }}"
+                     class="form-control"
+                     value="{{ form.email.value|default:user.email }}">
+            </div>
+            <!-- 其他表单内容... -->
+            <button type="submit" class="btn btn-primary">保存修改</button>
+            <a href="{% url 'index' %}" class="btn btn-outline-secondary ms-2">取消</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

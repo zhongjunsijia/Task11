@@ -1,0 +1,373 @@
+{% extends 'pollution_app/base.html' %}
+
+{% block title %}风玫瑰图 - 监测分析 - 气象污染预测系统{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-6">
+    <div class="row">
+        <!-- 左侧导航栏 -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">分析工具</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="{% url 'monitoring_analysis' %}?view=calendar"
+                           class="text-decoration-none {% if '/monitoring/' in request.path and 'view=calendar' in request.GET.urlencode %}active fw-bold{% endif %}">
+                            污染日历
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'pollution_map' %}"
+                           class="text-decoration-none {% if '/pollution-map/' in request.path %}active fw-bold{% endif %}">
+                            污染地图
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'sounding' %}"
+                           class="text-decoration-none {% if '/sounding/' in request.path %}active fw-bold{% endif %}">
+                            探空图
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'trend_chart' %}"
+                           class="text-decoration-none {% if '/trend-chart/' in request.path %}active fw-bold{% endif %}">
+                            走势图
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'windrose' %}"
+                           class="text-decoration-none active fw-bold">
+                            风玫瑰图
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 右侧风玫瑰图内容区域 -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">风玫瑰图分析</h5>
+                    <div class="d-flex gap-3">
+                        <div class="d-flex align-items-center">
+                            <label for="windrose-date" class="me-2 mb-0">日期范围:</label>
+                            <select id="windrose-date" class="form-select form-select-sm">
+                                <option value="7d">近3天</option>
+                                <option value="7d">近7天</option>
+                                <option value="30d" selected>近30天</option>
+                                <option value="90d">近90天</option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <label for="pollutant-filter" class="me-2 mb-0">污染物:</label>
+                            <select id="pollutant-filter" class="form-select form-select-sm">
+                                <option value="all">全部污染物</option>
+                                <option value="pm25">PM2.5</option>
+                                <option value="pm10">PM10</option>
+                                <option value="no2">二氧化氮</option>
+                                <option value="so2">二氧化硫</option>
+                                <option value="o3">臭氧</option>
+                                <option value="co">一氧化碳</option>
+                            </select>
+                        </div>
+                        <button id="refresh-windrose" class="btn btn-sm btn-primary">
+                            <i class="bi bi-refresh me-1"></i>刷新
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- 加载状态 -->
+                    <div id="windroseLoader" class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在加载风玫瑰图数据...</p>
+                    </div>
+
+                    <!-- 错误提示 -->
+                    <div id="chartError" class="alert alert-danger d-none" role="alert">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        <span>风玫瑰图加载失败，请确保Chart.js已正确加载</span>
+                    </div>
+
+                    <!-- 风玫瑰图容器 -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h6>风向风速分布</h6>
+                            <div style="height: 400px; position: relative;">
+                                <canvas id="wind-rose-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h6>污染物与风向关系</h6>
+                            <div style="height: 400px; position: relative;">
+                                <canvas id="pollutant-wind-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据说明 -->
+                    <div class="alert alert-info mt-4">
+                        <h6><i class="bi bi-info-circle me-1"></i>风玫瑰图说明</h6>
+                        <p class="mb-0 text-sm">线段长度表示频率/浓度大小，不同颜色代表不同风速区间/污染物类型。可直观展示各风向对应的污染物浓度分布，为分析污染来源提供参考。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+    }
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 只依赖基础Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    // 等待页面完全加载
+    document.addEventListener('DOMContentLoaded', function() {
+        // 检查Chart.js是否加载成功
+        if (typeof Chart === 'undefined') {
+            document.getElementById('chartError').classList.remove('d-none');
+            return;
+        }
+
+        // 创建风玫瑰图绘制函数
+        function createWindRoseChart(canvasId, labels, datasets, maxValue, unit) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+
+            // 准备数据集（转换为雷达图格式）
+            const radarDatasets = datasets.map((dataset) => {
+                return {
+                    label: dataset.label,
+                    data: dataset.values,
+                    backgroundColor: dataset.color.replace('0.7', '0.3'),
+                    borderColor: dataset.color,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: true
+                };
+            });
+
+            // 创建雷达图（模拟风玫瑰图效果）
+            return new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: radarDatasets
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: maxValue,
+                            ticks: {
+                                display: true,
+                                stepSize: maxValue / 4,
+                                callback: function(value) {
+                                    return value + unit;
+                                }
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw + unit;
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.1
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // 初始化风向风速风玫瑰图
+        function initWindSpeedRose() {
+            const directions = ['北', '东北', '东', '东南', '南', '西南', '西', '西北'];
+
+            // 风速数据
+            const datasets = [
+                {
+                    label: '0-2m/s',
+                    values: [12, 15, 8, 5, 3, 4, 6, 10],
+                    color: 'rgba(54, 162, 235, 0.7)'
+                },
+                {
+                    label: '2-4m/s',
+                    values: [8, 10, 12, 7, 5, 6, 9, 12],
+                    color: 'rgba(75, 192, 192, 0.7)'
+                },
+                {
+                    label: '4-6m/s',
+                    values: [5, 7, 9, 10, 7, 5, 6, 8],
+                    color: 'rgba(153, 102, 255, 0.7)'
+                },
+                {
+                    label: '>6m/s',
+                    values: [2, 3, 4, 5, 2, 1, 3, 4],
+                    color: 'rgba(255, 99, 132, 0.7)'
+                }
+            ];
+
+            return createWindRoseChart('wind-rose-chart', directions, datasets, 20, '%');
+        }
+
+        // 初始化污染物风玫瑰图
+        function initPollutantRose(filter = 'all') {
+            const directions = ['北', '东北', '东', '东南', '南', '西南', '西', '西北'];
+
+            // 污染物数据集
+            const allDatasets = [
+                {
+                    id: 'pm25',
+                    label: 'PM2.5',
+                    values: [45, 52, 60, 65, 35, 30, 40, 50],
+                    color: 'rgba(75, 192, 75, 0.7)'
+                },
+                {
+                    id: 'pm10',
+                    label: 'PM10',
+                    values: [65, 72, 80, 85, 55, 50, 60, 70],
+                    color: 'rgba(255, 206, 86, 0.7)'
+                },
+                {
+                    id: 'no2',
+                    label: 'NO₂',
+                    values: [30, 35, 42, 48, 25, 22, 28, 33],
+                    color: 'rgba(255, 99, 132, 0.7)'
+                },
+                {
+                    id: 'so2',  // 二氧化硫
+                    label: 'SO₂',
+                    values: [15, 18, 22, 25, 12, 10, 14, 16],
+                    color: 'rgba(153, 102, 255, 0.7)'
+                },
+                {
+                    id: 'o3',   // 臭氧
+                    label: 'O₃',
+                    values: [55, 62, 70, 68, 45, 40, 50, 58],
+                    color: 'rgba(54, 162, 235, 0.7)'
+                },
+                {
+                    id: 'co',   // 一氧化碳
+                    label: 'CO',
+                    values: [2.5, 3.2, 3.8, 4.2, 2.2, 1.8, 2.8, 3.5],
+                    color: 'rgba(255, 159, 64, 0.7)'
+                }
+            ];
+
+            // 根据筛选条件过滤数据集
+            const datasets = filter === 'all'
+                ? allDatasets
+                : allDatasets.filter(ds => ds.id === filter);
+
+            // 针对CO调整最大值（因为CO浓度单位和数值范围与其他不同）
+            const maxValue = filter === 'co' ? 5 : 100;
+            const unit = filter === 'co' ? ' mg/m³' : ' μg/m³';
+
+            return createWindRoseChart('pollutant-wind-chart', directions, datasets, maxValue, unit);
+        }
+
+        // 初始化图表
+        let windChart, pollutantChart;
+        try {
+            windChart = initWindSpeedRose();
+            pollutantChart = initPollutantRose();
+        } catch (error) {
+            console.error('图表初始化失败:', error);
+            document.getElementById('chartError').classList.remove('d-none');
+            return;
+        }
+
+        // 绑定事件
+        document.getElementById('refresh-windrose').addEventListener('click', function() {
+            document.getElementById('chartError').classList.add('d-none');
+            showLoader();
+            setTimeout(() => {
+                windChart.destroy();
+                pollutantChart.destroy();
+                windChart = initWindSpeedRose();
+                pollutantChart = initPollutantRose(document.getElementById('pollutant-filter').value);
+                hideLoader();
+            }, 600);
+        });
+
+        document.getElementById('windrose-date').addEventListener('change', function() {
+            showLoader();
+            setTimeout(() => {
+                hideLoader();
+            }, 600);
+        });
+
+        // 污染物筛选功能 - 只显示选中的污染物
+        document.getElementById('pollutant-filter').addEventListener('change', function() {
+            showLoader();
+            setTimeout(() => {
+                pollutantChart.destroy();
+                pollutantChart = initPollutantRose(this.value);
+                hideLoader();
+            }, 600);
+        });
+
+        // 加载状态控制
+        function showLoader() {
+            document.getElementById('windroseLoader').classList.remove('d-none');
+            document.getElementById('wind-rose-chart').parentElement.style.opacity = '0.5';
+            document.getElementById('pollutant-wind-chart').parentElement.style.opacity = '0.5';
+        }
+
+        function hideLoader() {
+            document.getElementById('windroseLoader').classList.add('d-none');
+            document.getElementById('wind-rose-chart').parentElement.style.opacity = '1';
+            document.getElementById('pollutant-wind-chart').parentElement.style.opacity = '1';
+        }
+    });
+</script>
+{% endblock %}
