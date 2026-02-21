@@ -25,10 +25,10 @@ env/
 Thumbs.db
 
 # Large files
-*.pkl
-*.h5
-*.pt
-*.bin
+# *.pkl
+# *.h5
+# *.pt
+# *.bin
 
 # Uploads
 uploads/
