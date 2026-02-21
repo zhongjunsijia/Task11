@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-训练支持向量回归(SVR)模型
+训练支持向量回归(SVR)模型 (简化版)
 
-对应论文 3.1.1 节，属于传统机器学习模型，作为基准模型
+只训练单个预测步长的模型，用于快速验证
 """
 
 import os
@@ -76,14 +76,14 @@ def train_svr_model(X_train, y_train, X_val, y_val, horizon=1):
         cache_size=200 # 缓存大小
     )
     
-    # 2. 超参数优化
-    print("2. 超参数优化 (网格搜索 + 5折时间序列交叉验证)...")
-    tscv = TimeSeriesSplit(n_splits=5)
+    # 2. 简化的超参数优化
+    print("2. 超参数优化 (简化网格搜索)...")
+    tscv = TimeSeriesSplit(n_splits=3)  # 减少交叉验证折数以加快训练
     
     param_grid = {
-        'C': [0.1, 1, 10, 100],
-        'gamma': ['scale', 'auto', 0.001, 0.01, 0.1],
-        'epsilon': [0.01, 0.1, 0.2, 0.5]
+        'C': [1, 10],  # 减少参数组合
+        'gamma': ['scale', 'auto'],
+        'epsilon': [0.1, 0.2]
     }
     
     grid_search = GridSearchCV(
@@ -112,7 +112,8 @@ def train_svr_model(X_train, y_train, X_val, y_val, horizon=1):
     y_val_pred = best_svr.predict(X_val)
     
     mae = mean_absolute_error(y_val, y_val_pred)
-    rmse = mean_squared_error(y_val, y_val_pred, squared=False)
+    mse = mean_squared_error(y_val, y_val_pred)
+    rmse = np.sqrt(mse)
     r2 = r2_score(y_val, y_val_pred)
     
     print(f"SVR验证集指标：")
@@ -159,7 +160,8 @@ def evaluate_model(model, X_test, y_test, horizon=1):
     y_test_pred = model.predict(X_test)
     
     mae = mean_absolute_error(y_test, y_test_pred)
-    rmse = mean_squared_error(y_test, y_test_pred, squared=False)
+    mse = mean_squared_error(y_test, y_test_pred)
+    rmse = np.sqrt(mse)
     r2 = r2_score(y_test, y_test_pred)
     
     print(f"SVR测试集指标：")
@@ -173,27 +175,26 @@ def main():
     """
     主函数
     """
-    # 测试不同的预测步长
-    forecast_horizons = [1, 6, 12, 24]
+    # 只训练预测步长为1的模型
+    horizon = 1
     
-    for horizon in forecast_horizons:
-        try:
-            # 加载数据
-            X_train, y_train, X_val, y_val, X_test, y_test = load_data(horizon)
-            
-            # 训练模型
-            best_svr = train_svr_model(X_train, y_train, X_val, y_val, horizon)
-            
-            # 评估模型
-            evaluate_model(best_svr, X_test, y_test, horizon)
-            
-            print("\n" + "=" * 80)
-            print(f"SVR模型训练完成 (预测步长: {horizon}小时)")
-            print("=" * 80)
-        except Exception as e:
-            print(f"训练SVR模型时出错 (预测步长: {horizon}小时): {str(e)}")
-            import traceback
-            traceback.print_exc()
+    try:
+        # 加载数据
+        X_train, y_train, X_val, y_val, X_test, y_test = load_data(horizon)
+        
+        # 训练模型
+        best_svr = train_svr_model(X_train, y_train, X_val, y_val, horizon)
+        
+        # 评估模型
+        evaluate_model(best_svr, X_test, y_test, horizon)
+        
+        print("\n" + "=" * 80)
+        print(f"SVR模型训练完成 (预测步长: {horizon}小时)")
+        print("=" * 80)
+    except Exception as e:
+        print(f"训练SVR模型时出错 (预测步长: {horizon}小时): {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()

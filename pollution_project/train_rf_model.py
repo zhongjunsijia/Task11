@@ -9,14 +9,15 @@
 import os
 import sys
 import numpy as np
-import joblib
+import pickle
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # 确保数据目录存在
 PROCESSED_DIR = os.path.join('data', 'processed')
-MODEL_DIR = os.path.join('models')
+# 模型保存到上级目录的models文件夹
+MODEL_DIR = os.path.abspath(os.path.join('..', 'models'))
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 def load_data(horizon=1):
@@ -74,7 +75,7 @@ def train_rf_model(X_train, y_train, X_val, y_val, horizon=1):
         min_samples_leaf=1,   # 最小叶子样本数
         max_features='sqrt',  # 特征采样比例
         random_state=42,
-        n_jobs=-1  # 多CPU并行
+        n_jobs=1  # 单CPU避免序列化问题
     )
     
     # 2. 超参数优化
@@ -93,7 +94,7 @@ def train_rf_model(X_train, y_train, X_val, y_val, horizon=1):
         param_grid=param_grid,
         cv=tscv,
         scoring='neg_mean_squared_error',  # 评价指标（负MSE，越大越好）
-        n_jobs=-1,
+        n_jobs=1,
         verbose=1
     )
     
@@ -130,10 +131,13 @@ def train_rf_model(X_train, y_train, X_val, y_val, horizon=1):
             os.makedirs('models')
             print("创建了models目录")
         
-        # 保存到当前目录的models文件夹
-        model_path = f'models/rf_model_horizon{horizon}.pkl'
+        # 使用绝对路径保存
+        model_path = os.path.join(MODEL_DIR, f'rf_model_horizon{horizon}.pkl')
         print(f"尝试保存到: {model_path}")
-        joblib.dump(best_rf, model_path)
+        
+        # 使用pickle保存模型
+        with open(model_path, 'wb') as f:
+            pickle.dump(best_rf, f)
         print(f"模型已保存到: {model_path}")
         
         # 检查文件是否存在
@@ -142,19 +146,7 @@ def train_rf_model(X_train, y_train, X_val, y_val, horizon=1):
             print(f"文件大小: {os.path.getsize(model_path)} 字节")
         else:
             print(f"文件不存在: {model_path}")
-        
-        # 同时保存一个副本到当前目录，用于评估脚本
-        local_model_path = f'rf_best_model_horizon{horizon}.pkl'
-        print(f"尝试保存到: {local_model_path}")
-        joblib.dump(best_rf, local_model_path)
-        print(f"模型副本已保存到: {local_model_path}")
-        
-        # 检查文件是否存在
-        if os.path.exists(local_model_path):
-            print(f"文件存在: {local_model_path}")
-            print(f"文件大小: {os.path.getsize(local_model_path)} 字节")
-        else:
-            print(f"文件不存在: {local_model_path}")
+            
     except Exception as e:
         print(f"保存模型时出错: {e}")
         import traceback

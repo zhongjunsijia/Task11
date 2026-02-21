@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-训练支持向量回归(SVR)模型
+训练随机森林(RF)模型 (简化版)
 
-对应论文 3.1.1 节，属于传统机器学习模型，作为基准模型
+只训练单个预测步长的模型，用于快速验证
 """
 
 import os
 import sys
 import numpy as np
 import pickle
-from sklearn.svm import SVR
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
@@ -48,9 +48,9 @@ def load_data(horizon=1):
         print(f"错误: 未找到预测步长 {horizon} 的数据，请先运行数据处理脚本")
         sys.exit(1)
 
-def train_svr_model(X_train, y_train, X_val, y_val, horizon=1):
+def train_rf_model(X_train, y_train, X_val, y_val, horizon=1):
     """
-    训练SVR模型
+    训练RF模型
     
     Args:
         X_train: 训练特征
@@ -60,34 +60,37 @@ def train_svr_model(X_train, y_train, X_val, y_val, horizon=1):
         horizon: 预测步长
     
     Returns:
-        best_svr: 最优模型
+        best_rf: 最优模型
     """
     print("=" * 80)
-    print(f"训练SVR模型 (预测步长: {horizon}小时)")
+    print(f"训练RF模型 (预测步长: {horizon}小时)")
     print("=" * 80)
     
     # 1. 模型初始化
     print("1. 模型初始化...")
-    svr = SVR(
-        kernel='rbf',  # 径向基函数核
-        C=1.0,         # 正则化参数
-        gamma='scale', # 核系数
-        epsilon=0.1,   # 不敏感损失函数的参数
-        cache_size=200 # 缓存大小
+    rf = RandomForestRegressor(
+        n_estimators=50,  # 减少决策树数量以加快训练
+        max_depth=10,     # 限制树深度以加快训练
+        min_samples_split=2,  # 最小样本分裂数
+        min_samples_leaf=1,   # 最小叶子样本数
+        max_features='sqrt',  # 特征采样比例
+        random_state=42,
+        n_jobs=1  # 单CPU避免序列化问题
     )
     
-    # 2. 超参数优化
-    print("2. 超参数优化 (网格搜索 + 5折时间序列交叉验证)...")
-    tscv = TimeSeriesSplit(n_splits=5)
+    # 2. 简化的超参数优化
+    print("2. 超参数优化 (简化网格搜索)...")
+    tscv = TimeSeriesSplit(n_splits=3)  # 减少交叉验证折数以加快训练
     
     param_grid = {
-        'C': [0.1, 1, 10, 100],
-        'gamma': ['scale', 'auto', 0.001, 0.01, 0.1],
-        'epsilon': [0.01, 0.1, 0.2, 0.5]
+        'n_estimators': [50, 100],  # 减少参数组合
+        'max_depth': [10, 20],
+        'min_samples_split': [2, 5],
+        'min_samples_leaf': [1, 2]
     }
     
     grid_search = GridSearchCV(
-        estimator=svr,
+        estimator=rf,
         param_grid=param_grid,
         cv=tscv,
         scoring='neg_mean_squared_error',  # 评价指标（负MSE，越大越好）
@@ -99,23 +102,23 @@ def train_svr_model(X_train, y_train, X_val, y_val, horizon=1):
     grid_search.fit(X_train, y_train)
     
     # 获取最优模型
-    best_svr = grid_search.best_estimator_
-    print(f"SVR最优超参数：{grid_search.best_params_}")
+    best_rf = grid_search.best_estimator_
+    print(f"RF最优超参数：{grid_search.best_params_}")
     print(f"最优交叉验证得分：{-grid_search.best_score_:.2f}")
     
     # 3. 模型训练
     print("3. 用最优超参数在完整训练集上训练...")
-    best_svr.fit(X_train, y_train)
+    best_rf.fit(X_train, y_train)
     
     # 4. 中间评估
     print("4. 在验证集上评估模型...")
-    y_val_pred = best_svr.predict(X_val)
+    y_val_pred = best_rf.predict(X_val)
     
     mae = mean_absolute_error(y_val, y_val_pred)
     rmse = mean_squared_error(y_val, y_val_pred, squared=False)
     r2 = r2_score(y_val, y_val_pred)
     
-    print(f"SVR验证集指标：")
+    print(f"RF验证集指标：")
     print(f"MAE = {mae:.2f}")
     print(f"RMSE = {rmse:.2f}")
     print(f"R² = {r2:.2f}")
@@ -123,11 +126,13 @@ def train_svr_model(X_train, y_train, X_val, y_val, horizon=1):
     # 5. 模型保存
     print("5. 保存模型...")
     try:
-        model_path = os.path.join(MODEL_DIR, f'svr_model_horizon{horizon}.pkl')
+        # 使用绝对路径保存
+        model_path = os.path.join(MODEL_DIR, f'rf_model_horizon{horizon}.pkl')
         print(f"尝试保存到: {model_path}")
         
+        # 使用pickle保存模型
         with open(model_path, 'wb') as f:
-            pickle.dump(best_svr, f)
+            pickle.dump(best_rf, f)
         print(f"模型已保存到: {model_path}")
         
         # 检查文件是否存在
@@ -142,7 +147,7 @@ def train_svr_model(X_train, y_train, X_val, y_val, horizon=1):
         import traceback
         traceback.print_exc()
     
-    return best_svr
+    return best_rf
 
 def evaluate_model(model, X_test, y_test, horizon=1):
     """
@@ -154,7 +159,7 @@ def evaluate_model(model, X_test, y_test, horizon=1):
         y_test: 测试标签
         horizon: 预测步长
     """
-    print(f"\n在测试集上评估SVR模型 (预测步长: {horizon}小时)...")
+    print(f"\n在测试集上评估RF模型 (预测步长: {horizon}小时)...")
     
     y_test_pred = model.predict(X_test)
     
@@ -162,7 +167,7 @@ def evaluate_model(model, X_test, y_test, horizon=1):
     rmse = mean_squared_error(y_test, y_test_pred, squared=False)
     r2 = r2_score(y_test, y_test_pred)
     
-    print(f"SVR测试集指标：")
+    print(f"RF测试集指标：")
     print(f"MAE = {mae:.2f}")
     print(f"RMSE = {rmse:.2f}")
     print(f"R² = {r2:.2f}")
@@ -173,27 +178,26 @@ def main():
     """
     主函数
     """
-    # 测试不同的预测步长
-    forecast_horizons = [1, 6, 12, 24]
+    # 只训练预测步长为1的模型
+    horizon = 1
     
-    for horizon in forecast_horizons:
-        try:
-            # 加载数据
-            X_train, y_train, X_val, y_val, X_test, y_test = load_data(horizon)
-            
-            # 训练模型
-            best_svr = train_svr_model(X_train, y_train, X_val, y_val, horizon)
-            
-            # 评估模型
-            evaluate_model(best_svr, X_test, y_test, horizon)
-            
-            print("\n" + "=" * 80)
-            print(f"SVR模型训练完成 (预测步长: {horizon}小时)")
-            print("=" * 80)
-        except Exception as e:
-            print(f"训练SVR模型时出错 (预测步长: {horizon}小时): {str(e)}")
-            import traceback
-            traceback.print_exc()
+    try:
+        # 加载数据
+        X_train, y_train, X_val, y_val, X_test, y_test = load_data(horizon)
+        
+        # 训练模型
+        best_rf = train_rf_model(X_train, y_train, X_val, y_val, horizon)
+        
+        # 评估模型
+        evaluate_model(best_rf, X_test, y_test, horizon)
+        
+        print("\n" + "=" * 80)
+        print(f"RF模型训练完成 (预测步长: {horizon}小时)")
+        print("=" * 80)
+    except Exception as e:
+        print(f"训练RF模型时出错 (预测步长: {horizon}小时): {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()

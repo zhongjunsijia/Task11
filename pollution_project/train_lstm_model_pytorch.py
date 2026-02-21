@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-训练长短期记忆网络(LSTM)模型
+训练长短期记忆网络(LSTM)模型 (使用PyTorch)
 
 对应论文 3.1.3 节，属于深度学习模型，作为基准模型
 """
@@ -9,15 +9,9 @@
 import os
 import sys
 import numpy as np
-try:
-    import tensorflow as tf
-    from tensorflow.keras.models import Sequential, load_model
-    from tensorflow.keras.layers import LSTM, Dense, Dropout
-    from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-except ImportError:
-    print("错误: 未找到TensorFlow库，请先安装TensorFlow")
-    sys.exit(1)
-
+import torch
+import torch.nn as nn
+import torch.optim as optim
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import optuna
 
@@ -29,6 +23,10 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 
 # 时间窗口长度
 L = 24
+
+# 设备设置
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"使用设备: {device}")
 
 def load_data(horizon=1):
     """
@@ -77,35 +75,72 @@ def create_lstm_input(X, y, window_size):
         y_lstm.append(y[i])  # 未来1小时的PM2.5浓度
     return np.array(X_lstm), np.array(y_lstm)
 
-def build_lstm_model(input_shape, units=128, dropout_rate=0.2, learning_rate=0.001):
+class LSTMModel(nn.Module):
     """
-    构建LSTM模型
-    
-    Args:
-        input_shape: 输入形状 (时间步, 特征数)
-        units: LSTM单元数
-        dropout_rate: Dropout率
-        learning_rate: 学习率
-    
-    Returns:
-        构建好的LSTM模型
+    PyTorch LSTM模型
     """
-    model = Sequential([
-        LSTM(units=units, input_shape=input_shape),
-        Dropout(dropout_rate),
-        Dense(64, activation='relu'),
-        Dropout(dropout_rate),
-        Dense(1)
-    ])
+    def __init__(self, input_size, hidden_size, dropout_rate=0.2):
+        super(LSTMModel, self).__init__()
+        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
+        self.dropout1 = nn.Dropout(dropout_rate)
+        self.fc1 = nn.Linear(hidden_size, 64)
+        self.dropout2 = nn.Dropout(dropout_rate)
+        self.fc2 = nn.Linear(64, 1)
     
-    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-    model.compile(
-        optimizer=optimizer,
-        loss='mean_squared_error',
-        metrics=['mean_absolute_error']
+    def forward(self, x):
+        out, _ = self.lstm(x)
+        out = out[:, -1, :]  # 取最后一个时间步的输出
+        out = self.dropout1(out)
+        out = torch.relu(self.fc1(out))
+        out = self.dropout2(out)
+        out = self.fc2(out)
+        return out
+
+def train_epoch(model, dataloader, optimizer, criterion):
+    """
+    训练一个epoch
+    """
+    model.train()
+    total_loss = 0
+    for X_batch, y_batch in dataloader:
+        X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+        optimizer.zero_grad()
+        output = model(X_batch)
+        loss = criterion(output, y_batch.unsqueeze(1))
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item()
+    return total_loss / len(dataloader)
+
+def evaluate_epoch(model, dataloader, criterion):
+    """
+    评估一个epoch
+    """
+    model.eval()
+    total_loss = 0
+    all_preds = []
+    all_targets = []
+    with torch.no_grad():
+        for X_batch, y_batch in dataloader:
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+            output = model(X_batch)
+            loss = criterion(output, y_batch.unsqueeze(1))
+            total_loss += loss.item()
+            all_preds.extend(output.cpu().numpy().flatten())
+            all_targets.extend(y_batch.cpu().numpy())
+    return total_loss / len(dataloader), np.array(all_preds), np.array(all_targets)
+
+def create_dataloader(X, y, batch_size, shuffle=True):
+    """
+    创建数据加载器
+    """
+    dataset = torch.utils.data.TensorDataset(
+        torch.tensor(X, dtype=torch.float32),
+        torch.tensor(y, dtype=torch.float32)
     )
-    
-    return model
+    return torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, shuffle=shuffle
+    )
 
 def optimize_hyperparameters(X_train_lstm, y_train_lstm, X_val_lstm, y_val_lstm):
     """
@@ -124,47 +159,48 @@ def optimize_hyperparameters(X_train_lstm, y_train_lstm, X_val_lstm, y_val_lstm)
     
     def objective(trial):
         # 待优化超参数
-        units = trial.suggest_categorical('units', [64, 128, 256])
+        hidden_size = trial.suggest_categorical('hidden_size', [64, 128, 256])
         dropout_rate = trial.suggest_float('dropout_rate', 0.1, 0.3)
         learning_rate = trial.suggest_categorical('lr', [0.0001, 0.0005, 0.001])
         batch_size = trial.suggest_categorical('batch_size', [32, 64, 128])
         
+        # 创建数据加载器
+        train_loader = create_dataloader(X_train_lstm, y_train_lstm, batch_size, shuffle=True)
+        val_loader = create_dataloader(X_val_lstm, y_val_lstm, batch_size, shuffle=False)
+        
         # 构建模型
-        model = Sequential([
-            LSTM(units=units, input_shape=(L, X_train_lstm.shape[2])),
-            Dropout(dropout_rate),
-            Dense(64, activation='relu'),
-            Dropout(dropout_rate),
-            Dense(1)
-        ])
-        model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-            loss='mean_squared_error'
-        )
+        input_size = X_train_lstm.shape[2]
+        model = LSTMModel(input_size, hidden_size, dropout_rate).to(device)
         
-        # 训练（加入早停机制）
-        early_stop = tf.keras.callbacks.EarlyStopping(
-            monitor='val_loss', patience=5, restore_best_weights=True
-        )
-        history = model.fit(
-            X_train_lstm, y_train_lstm,
-            batch_size=batch_size,
-            epochs=50,
-            validation_data=(X_val_lstm, y_val_lstm),
-            callbacks=[early_stop],
-            verbose=0
-        )
+        # 优化器和损失函数
+        optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+        criterion = nn.MSELoss()
         
-        # 返回验证集RMSE
-        val_rmse = np.sqrt(min(history.history['val_loss']))
-        return val_rmse
+        # 训练（早停机制）
+        best_val_loss = float('inf')
+        patience = 5
+        patience_counter = 0
+        
+        for epoch in range(50):
+            train_loss = train_epoch(model, train_loader, optimizer, criterion)
+            val_loss, _, _ = evaluate_epoch(model, val_loader, criterion)
+            
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                patience_counter = 0
+            else:
+                patience_counter += 1
+                if patience_counter >= patience:
+                    break
+        
+        return best_val_loss
     
     # 运行贝叶斯优化（最大评估30次）
     study = optuna.create_study(direction='minimize')
     study.optimize(objective, n_trials=30)
     
     print(f"LSTM最优超参数：{study.best_params}")
-    print(f"最优验证集RMSE：{study.best_value:.2f}")
+    print(f"最优验证集MSE：{study.best_value:.2f}")
     
     return study.best_params
 
@@ -205,53 +241,67 @@ def train_lstm_model(X_train, y_train, X_val, y_val, X_test, y_test, horizon=1):
     # 最优超参数
     print("LSTM最优超参数：", best_params)
     # 重新构建最优模型
-    final_lstm = Sequential([
-        LSTM(units=best_params['units'], input_shape=(L, X_train_lstm.shape[2])),
-        Dropout(best_params['dropout_rate']),
-        Dense(64, activation='relu'),
-        Dropout(best_params['dropout_rate']),
-        Dense(1)
-    ])
-    final_lstm.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=best_params['lr']),
-        loss='mean_squared_error'
-    )
-    
-    final_lstm.summary()
+    input_size = X_train_lstm.shape[2]
+    model = LSTMModel(
+        input_size, 
+        best_params['hidden_size'], 
+        best_params['dropout_rate']
+    ).to(device)
     
     # 4. 模型训练
     print("4. 模型训练...")
     
-    # 回调函数
-    early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
-    checkpoint_path = os.path.join(MODEL_DIR, f'lstm_best_model_horizon{horizon}.h5')
-    model_checkpoint = tf.keras.callbacks.ModelCheckpoint(
-        checkpoint_path, monitor='val_loss', save_best_only=True
-    )
+    # 创建数据加载器
+    batch_size = best_params['batch_size']
+    train_loader = create_dataloader(X_train_lstm, y_train_lstm, batch_size, shuffle=True)
+    val_loader = create_dataloader(X_val_lstm, y_val_lstm, batch_size, shuffle=False)
+    test_loader = create_dataloader(X_test_lstm, y_test_lstm, batch_size, shuffle=False)
     
-    # 训练
-    history = final_lstm.fit(
-        X_train_lstm, y_train_lstm,
-        batch_size=best_params['batch_size'],
-        epochs=50,
-        validation_data=(X_val_lstm, y_val_lstm),
-        callbacks=[early_stop, model_checkpoint],
-        verbose=1
-    )
+    # 优化器和损失函数
+    optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
+    criterion = nn.MSELoss()
+    
+    # 训练（早停机制）
+    best_val_loss = float('inf')
+    patience = 5
+    patience_counter = 0
+    best_model_state = None
+    
+    for epoch in range(50):
+        train_loss = train_epoch(model, train_loader, optimizer, criterion)
+        val_loss, _, _ = evaluate_epoch(model, val_loader, criterion)
+        
+        print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+        
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_model_state = model.state_dict()
+            patience_counter = 0
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print("早停！")
+                break
+    
+    # 加载最优模型
+    model.load_state_dict(best_model_state)
     
     # 5. 中间评估
     print("5. 在验证集上评估模型...")
-    val_loss, val_mae = final_lstm.evaluate(X_val_lstm, y_val_lstm, verbose=0)
+    val_loss, val_preds, val_targets = evaluate_epoch(model, val_loader, criterion)
     val_rmse = np.sqrt(val_loss)
+    val_mae = mean_absolute_error(val_targets, val_preds)
+    val_r2 = r2_score(val_targets, val_preds)
     
     print(f"LSTM验证集指标：")
     print(f"MAE = {val_mae:.2f}")
     print(f"RMSE = {val_rmse:.2f}")
+    print(f"R² = {val_r2:.2f}")
     
     # 6. 模型保存
     print("6. 保存模型...")
-    model_path = os.path.join(MODEL_DIR, f'lstm_model_horizon{horizon}.h5')
-    final_lstm.save(model_path)
+    model_path = os.path.join(MODEL_DIR, f'lstm_model_horizon{horizon}.pt')
+    torch.save(model.state_dict(), model_path)
     print(f"模型已保存到: {model_path}")
     
     # 检查文件是否存在
@@ -261,7 +311,7 @@ def train_lstm_model(X_train, y_train, X_val, y_val, X_test, y_test, horizon=1):
     else:
         print(f"文件不存在: {model_path}")
     
-    return final_lstm
+    return model
 
 def evaluate_model(model, X_test, y_test, horizon=1):
     """
@@ -278,20 +328,22 @@ def evaluate_model(model, X_test, y_test, horizon=1):
     # 转换测试数据
     X_test_lstm, y_test_lstm = create_lstm_input(X_test, y_test, L)
     
-    # 评估
-    test_loss, test_mae = model.evaluate(X_test_lstm, y_test_lstm, verbose=0)
-    test_rmse = np.sqrt(test_loss)
+    # 创建测试数据加载器
+    test_loader = create_dataloader(X_test_lstm, y_test_lstm, batch_size=64, shuffle=False)
     
-    # 预测
-    y_test_pred = model.predict(X_test_lstm).flatten()
-    r2 = r2_score(y_test_lstm, y_test_pred)
+    # 评估
+    criterion = nn.MSELoss()
+    test_loss, test_preds, test_targets = evaluate_epoch(model, test_loader, criterion)
+    test_rmse = np.sqrt(test_loss)
+    test_mae = mean_absolute_error(test_targets, test_preds)
+    test_r2 = r2_score(test_targets, test_preds)
     
     print(f"LSTM测试集指标：")
     print(f"MAE = {test_mae:.2f}")
     print(f"RMSE = {test_rmse:.2f}")
-    print(f"R² = {r2:.2f}")
+    print(f"R² = {test_r2:.2f}")
     
-    return test_mae, test_rmse, r2
+    return test_mae, test_rmse, test_r2
 
 def main():
     """
