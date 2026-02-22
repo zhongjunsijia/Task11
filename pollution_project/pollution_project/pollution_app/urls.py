@@ -82,6 +82,8 @@ urlpatterns = [
     
     # 实时数据API
     path('api/latest-data/', views.api_latest_data, name='api_latest_data'),
+    # 贺州市趋势数据API
+    path('api/hezhou-trend/', views.api_hezhou_trend_data, name='api_hezhou_trend_data'),
 ]
 
 # 开发环境下的媒体文件路由配置
