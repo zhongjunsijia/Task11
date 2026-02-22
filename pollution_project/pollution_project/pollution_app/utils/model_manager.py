@@ -14,7 +14,7 @@ from scipy.stats import randint, uniform
 import joblib
 from django.conf import settings
 from django.utils import timezone
-from pollution_app.models import ModelEvaluation
+from ..models import ModelEvaluation
 
 
 class ModelManager:

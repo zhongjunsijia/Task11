@@ -69,8 +69,51 @@ def load_scaler():
 
 
 def predict_pollution(date, temperature, humidity, wind_speed,
-                      pm25, pm10, no2, so2, o3, co, model_type='linear'):  # model_type参数
+                      pm25, pm10, no2, so2, o3, co, model_type='linear', use_real_time_data=False):  # model_type参数
     """支持多种模型类型的预测函数"""
+    # 如果使用实时数据
+    if use_real_time_data:
+        print("使用实时数据进行预测")
+        try:
+            # 导入实时预测模块
+            import sys
+            import os
+            sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            from real_time_prediction import predict_with_real_time_data
+            
+            # 映射模型类型到实时预测模块支持的模型名称
+            model_mapping = {
+                'linear': 'rf',  # 默认使用RF模型
+                'nn': 'lstm',
+                'backend_rf': 'rf',
+                'rf': 'rf',
+                'svr': 'svr',
+                'lstm': 'lstm'
+            }
+            
+            # 获取对应的模型名称
+            real_time_model = model_mapping.get(model_type, 'rf')
+            
+            # 使用实时数据进行预测
+            result = predict_with_real_time_data(real_time_model, horizon=1)
+            
+            # 转换结果格式
+            return {
+                'pm25': round(result.get('pm25', pm25), 2),
+                'pm10': round(result.get('pm10', pm10), 2),
+                'no2': round(result.get('no2', no2), 2),
+                'so2': round(result.get('so2', so2), 2),
+                'o3': round(result.get('o3', o3), 2),
+                'co': round(result.get('co', co), 2),
+                'date': date.strftime('%Y-%m-%d'),
+                'model': result.get('model', model_type),
+                'timestamp': result.get('timestamp', '')
+            }
+        except Exception as e:
+            print(f"实时数据预测失败: {e}")
+            # 失败时继续使用原有方法
+            pass
+    
     # 如果使用后端模型
     if model_type == 'backend_rf':
         try:
@@ -173,7 +216,7 @@ def predict_pollution(date, temperature, humidity, wind_speed,
             }
 
 
-def batch_predict_pollution(prediction_data, model_type='linear'):
+def batch_predict_pollution(prediction_data, model_type='linear', use_real_time_data=False):
     """
     批量预测污染数据
     :param prediction_data: 预测数据列表，每个元素包含：
@@ -190,10 +233,62 @@ def batch_predict_pollution(prediction_data, model_type='linear'):
             'co': 当前CO值
         }
     :param model_type: 模型类型
+    :param use_real_time_data: 是否使用实时数据
     :return: 批量预测结果列表
     """
     import time
     start_time = time.time()
+    
+    # 如果使用实时数据
+    if use_real_time_data and prediction_data:
+        print("使用实时数据进行批量预测")
+        try:
+            # 导入实时预测模块
+            import sys
+            import os
+            sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            from real_time_prediction import predict_all_models
+            
+            # 获取所有模型的实时预测结果
+            all_predictions = predict_all_models(horizon=1)
+            
+            # 映射模型类型到实时预测结果
+            model_mapping = {
+                'linear': 'rf',
+                'nn': 'lstm',
+                'backend_rf': 'rf',
+                'rf': 'rf',
+                'svr': 'svr',
+                'lstm': 'lstm'
+            }
+            
+            # 获取对应的模型结果
+            real_time_model = model_mapping.get(model_type, 'rf')
+            real_time_result = all_predictions.get(real_time_model, all_predictions.get('rf', {}))
+            
+            # 为每个预测日期生成结果
+            results = []
+            for data in prediction_data:
+                date = data['date']
+                result = {
+                    'pm25': round(real_time_result.get('pm25', data['pm25']), 2),
+                    'pm10': round(real_time_result.get('pm10', data['pm10']), 2),
+                    'no2': round(real_time_result.get('no2', data['no2']), 2),
+                    'so2': round(real_time_result.get('so2', data['so2']), 2),
+                    'o3': round(real_time_result.get('o3', data['o3']), 2),
+                    'co': round(real_time_result.get('co', data['co']), 2),
+                    'date': date.strftime('%Y-%m-%d'),
+                    'model': real_time_result.get('model', model_type),
+                    'timestamp': real_time_result.get('timestamp', '')
+                }
+                results.append(result)
+            
+            print(f"实时数据批量预测完成，耗时: {time.time() - start_time:.2f}秒")
+            return results
+        except Exception as e:
+            print(f"实时数据批量预测失败: {e}")
+            # 失败时继续使用原有方法
+            pass
     
     # 后端随机森林模型只支持PM2.5预测，且处理方式不同
     if model_type == 'backend_rf':
@@ -326,7 +421,8 @@ def batch_predict_pollution(prediction_data, model_type='linear'):
                 data['so2'],
                 data['o3'],
                 data['co'],
-                model_type=model_type
+                model_type=model_type,
+                use_real_time_data=use_real_time_data
             )
             results.append(result)
         
