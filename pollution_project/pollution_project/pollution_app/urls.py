@@ -84,8 +84,11 @@ urlpatterns = [
     
     # 实时数据API
     path('api/latest-data/', views.api_latest_data, name='api_latest_data'),
-    # 贺州市趋势数据API
+    # 贺州市趋势数据与日历API
     path('api/hezhou-trend/', views.api_hezhou_trend_data, name='api_hezhou_trend_data'),
+    path('api/pollution-calendar/', views.api_pollution_calendar, name='api_pollution_calendar'),
+    # 污染地图数据API
+    path('api/pollution-map/', views.api_pollution_map, name='api_pollution_map'),
 ]
 
 # 开发环境下的媒体文件路由配置

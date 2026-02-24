@@ -223,78 +223,97 @@
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
 <script>
-    // 扩展后的监测点数据结构，增加了PM10、SO2、NO2、O3、CO字段
-    const monitoringStations = [
-        {
-            name: "八步区监测点",
-            lat: 24.4152,
-            lng: 111.5411,
-            pm25: 45,
-            pm10: 68,
-            so2: 12,
-            no2: 25,
-            o3: 82,
-            co: 1.2,
-            level: "优"
-        },
-        {
-            name: "平桂区监测点",
-            lat: 24.3767,
-            lng: 111.3822,
-            pm25: 62,
-            pm10: 95,
-            so2: 18,
-            no2: 32,
-            o3: 75,
-            co: 1.5,
-            level: "良"
-        },
-        {
-            name: "昭平县监测点",
-            lat: 24.1806,
-            lng: 110.9719,
-            pm25: 35,
-            pm10: 52,
-            so2: 9,
-            no2: 18,
-            o3: 90,
-            co: 0.8,
-            level: "优"
-        },
-        {
-            name: "钟山县监测点",
-            lat: 24.5722,
-            lng: 111.2078,
-            pm25: 112,
-            pm10: 165,
-            so2: 25,
-            no2: 45,
-            o3: 68,
-            co: 2.1,
-            level: "轻度污染"
-        },
-        {
-            name: "富川县监测点",
-            lat: 24.8206,
-            lng: 111.2006,
-            pm25: 58,
-            pm10: 88,
-            so2: 15,
-            no2: 28,
-            o3: 85,
-            co: 1.3,
-            level: "良"
-        }
-    ];
+    // 监测点数据（从后端获取）
+    let monitoringStations = [];
 
-    // 热力图数据（基于监测点周边扩散模拟）
-    const heatmapData = [
-        [24.41, 111.55, 42], [24.43, 111.58, 45], [24.40, 111.52, 38], // 八步区周边
-        [24.38, 111.39, 60], [24.37, 111.42, 65], [24.39, 111.36, 58], // 平桂区周边
-        [24.18, 110.97, 35], [24.17, 110.95, 32], [24.19, 110.99, 38], // 昭平县周边
-        [24.57, 111.21, 112], [24.58, 111.23, 108], [24.56, 111.19, 115], // 钟山县周边
-        [24.82, 111.20, 58], [24.83, 111.22, 62], [24.81, 111.18, 55]  // 富川县周边
-    ];
+    // 热力图数据
+    let heatmapData = [];
+
+    // 从后端获取真实数据
+    async function fetchMapData() {
+        try {
+            const response = await fetch('/api/pollution-map/');
+            const data = await response.json();
+            if (data.code === 200) {
+                monitoringStations = data.data.stations;
+                heatmapData = data.data.heatmap;
+                initMap();
+            }
+        } catch (error) {
+            console.error('获取地图数据失败:', error);
+            // 使用默认数据
+            monitoringStations = [
+                {
+                    name: "八步区监测点",
+                    lat: 24.4152,
+                    lng: 111.5411,
+                    pm25: 45,
+                    pm10: 68,
+                    so2: 12,
+                    no2: 25,
+                    o3: 82,
+                    co: 1.2,
+                    level: "优"
+                },
+                {
+                    name: "平桂区监测点",
+                    lat: 24.3767,
+                    lng: 111.3822,
+                    pm25: 62,
+                    pm10: 95,
+                    so2: 18,
+                    no2: 32,
+                    o3: 75,
+                    co: 1.5,
+                    level: "良"
+                },
+                {
+                    name: "昭平县监测点",
+                    lat: 24.1806,
+                    lng: 110.9719,
+                    pm25: 35,
+                    pm10: 52,
+                    so2: 9,
+                    no2: 18,
+                    o3: 90,
+                    co: 0.8,
+                    level: "优"
+                },
+                {
+                    name: "钟山县监测点",
+                    lat: 24.5722,
+                    lng: 111.2078,
+                    pm25: 112,
+                    pm10: 165,
+                    so2: 25,
+                    no2: 45,
+                    o3: 68,
+                    co: 2.1,
+                    level: "轻度污染"
+                },
+                {
+                    name: "富川县监测点",
+                    lat: 24.8206,
+                    lng: 111.2006,
+                    pm25: 58,
+                    pm10: 88,
+                    so2: 15,
+                    no2: 28,
+                    o3: 85,
+                    co: 1.3,
+                    level: "良"
+                }
+            ];
+            heatmapData = [
+                [24.41, 111.55, 42], [24.43, 111.58, 45], [24.40, 111.52, 38],
+                [24.38, 111.39, 60], [24.37, 111.42, 65], [24.39, 111.36, 58],
+                [24.18, 110.97, 35], [24.17, 110.95, 32], [24.19, 110.99, 38],
+                [24.57, 111.21, 112], [24.58, 111.23, 108], [24.56, 111.19, 115],
+                [24.82, 111.20, 58], [24.83, 111.22, 62], [24.81, 111.18, 55]
+            ];
+            initMap();
+        }
+    }
 
     // 全局变量
     let markersLayer, heatmapLayer;
@@ -677,7 +696,7 @@
 
     // 页面加载完成后初始化地图
     window.onload = function() {
-        initMap();
+        fetchMapData();
 
         // 切换显示模式（监测点/热力图）
         document.getElementById('display-mode').addEventListener('change', function(e) {

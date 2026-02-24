@@ -295,107 +295,135 @@ function showRefreshNotification() {
     }, 3000);
 }
 
-// 生成污染日历
-function generatePollutionCalendar() {
+// 从后端获取污染日历数据
+async function fetchCalendarData(startDate, endDate) {
+    const params = new URLSearchParams({
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+    });
+    const response = await fetch(`/api/pollution-calendar/?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    });
+    const data = await response.json();
+    if (data.code !== 200) {
+        throw new Error(data.message || '接口返回错误');
+    }
+    return data.data || [];
+}
+
+// 生成污染日历（使用实时接口数据）
+async function generatePollutionCalendar() {
+    const calendarContainer = document.getElementById('pollutionCalendar');
+    const loader = document.getElementById('calendarLoader');
+    const noDataMsg = document.getElementById('noDataMessage');
+
+    if (!calendarContainer || !loader || !noDataMsg) return;
+
     try {
-        const calendarContainer = document.getElementById('pollutionCalendar');
-        const loader = document.getElementById('calendarLoader');
-        const noDataMsg = document.getElementById('noDataMessage');
-
-        if (!calendarContainer || !loader || !noDataMsg) return;
-
         // 显示加载状态
         calendarContainer.innerHTML = '';
         loader.classList.remove('d-none');
         noDataMsg.classList.add('d-none');
 
-        // 模拟API请求延迟
-        setTimeout(() => {
-            const startDate = currentFilters.startDate;
-            const endDate = currentFilters.endDate;
-            calendarContainer.innerHTML = '';
+        const startDate = currentFilters.startDate;
+        const endDate = currentFilters.endDate;
 
-            // 添加星期标题
-            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-            weekdays.forEach(day => {
-                const header = document.createElement('div');
-                header.className = 'calendar-header';
-                header.textContent = day;
-                calendarContainer.appendChild(header);
+        // 调用后端API获取真实（或基于实时AQI生成的）数据
+        const records = await fetchCalendarData(startDate, endDate);
+
+        // 按日期组织数据，方便快速查找
+        const dataByDate = {};
+        records.forEach(item => {
+            dataByDate[item.date] = item;
+        });
+
+        calendarContainer.innerHTML = '';
+
+        // 添加星期标题
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        weekdays.forEach(day => {
+            const header = document.createElement('div');
+            header.className = 'calendar-header';
+            header.textContent = day;
+            calendarContainer.appendChild(header);
+        });
+
+        // 计算日期范围
+        const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        let hasData = false;
+
+        // 获取起始日期的星期索引，用于填充空白格子
+        const firstDayIndex = startDate.getDay();
+        for (let i = 0; i < firstDayIndex; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'calendar-day empty';
+            calendarContainer.appendChild(emptyCell);
+        }
+
+        // 生成日期格子 - 只处理当前选中的区域
+        const selectedRegions = currentFilters.region === 'all'
+            ? Object.keys(regions)
+            : [currentFilters.region];
+
+        for (let i = 0; i < daysDiff; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            const day = date.getDate();
+            const isPastOrToday = date <= new Date();
+            const dateStr = date.toISOString().split('T')[0];
+            const record = dataByDate[dateStr];
+
+            // 如果该日期没有数据，则跳过
+            if (!record) {
+                continue;
+            }
+
+            const pollutantKey = record.main_pollutant || 'pm25';
+            const level = record.level || '良';
+
+            // 只循环当前选中的区域
+            selectedRegions.forEach(regionKey => {
+                hasData = true;
+
+                const dayElement = document.createElement('div');
+                dayElement.className = `calendar-day level-${level}`;
+                dayElement.dataset.date = dateStr;
+                dayElement.dataset.region = regionKey;
+                dayElement.innerHTML = `
+                    <div class="date">${day}</div>
+                    <div class="pollutant">${pollutantConfig[pollutantKey].name}</div>
+                `;
+
+                // 点击事件（仅过去或当天可点击）
+                if (isPastOrToday) {
+                    dayElement.addEventListener('click', () => {
+                        showPollutionDetails(
+                            dayElement.dataset.date,
+                            regionKey,
+                            pollutantKey,
+                            level
+                        );
+                    });
+                } else {
+                    dayElement.style.opacity = '0.6';
+                }
+
+                calendarContainer.appendChild(dayElement);
             });
+        }
 
-            // 计算日期范围
-            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-            let hasData = false;
+        // 隐藏加载状态
+        loader.classList.add('d-none');
 
-            // 获取起始日期的星期索引，用于填充空白格子
-            const firstDayIndex = startDate.getDay();
-            for (let i = 0; i < firstDayIndex; i++) {
-                const emptyCell = document.createElement('div');
-                emptyCell.className = 'calendar-day empty';
-                calendarContainer.appendChild(emptyCell);
-            }
-
-            // 生成日期格子 - 只处理当前选中的区域
-            const selectedRegions = currentFilters.region === 'all'
-                ? Object.keys(regions)
-                : [currentFilters.region];
-
-            for (let i = 0; i < daysDiff; i++) {
-                const date = new Date(startDate);
-                date.setDate(startDate.getDate() + i);
-                const day = date.getDate();
-                const isPastOrToday = date <= new Date();
-
-                // 只循环当前选中的区域
-                selectedRegions.forEach(regionKey => {
-                    hasData = true;
-                    // 获取真实数据（替换模拟数据）
-                    const pollutants = ['pm25', 'pm10', 'no2', 'so2', 'o3', 'co'];
-                    const randomPollutant = pollutants[Math.floor(Math.random() * pollutants.length)];
-                    const levels = ['优', '良', '轻度污染', '中度污染', '重度污染', '严重污染'];
-                    const randomLevel = levels[Math.floor(Math.random() * levels.length)];
-
-                    const dayElement = document.createElement('div');
-                    dayElement.className = `calendar-day level-${randomLevel}`;
-                    dayElement.dataset.date = date.toISOString().split('T')[0];
-                    dayElement.dataset.region = regionKey;
-                    dayElement.innerHTML = `
-                        <div class="date">${day}</div>
-                        <div class="pollutant">${pollutantConfig[randomPollutant].name}</div>
-                        <div class="region-tag">${regions[regionKey].shortName}</div>
-                    `;
-
-                    // 点击事件（仅过去或当天可点击）
-                    if (isPastOrToday) {
-                        dayElement.addEventListener('click', () => {
-                            showPollutionDetails(
-                                dayElement.dataset.date,
-                                regionKey,
-                                randomPollutant,
-                                randomLevel
-                            );
-                        });
-                    } else {
-                        dayElement.style.opacity = '0.6';
-                    }
-
-                    calendarContainer.appendChild(dayElement);
-                });
-            }
-
-            // 隐藏加载状态
-            loader.classList.add('d-none');
-
-            // 显示无数据提示或图例
-            if (!hasData) {
-                noDataMsg.classList.remove('d-none');
-            } else {
-                addCalendarLegend(calendarContainer.parentNode);
-            }
-
-        }, 800);
-
+        // 显示无数据提示或图例
+        if (!hasData) {
+            noDataMsg.classList.remove('d-none');
+        } else {
+            addCalendarLegend(calendarContainer.parentNode);
+        }
     } catch (error) {
         console.error('生成污染日历失败:', error);
         loader.classList.add('d-none');
