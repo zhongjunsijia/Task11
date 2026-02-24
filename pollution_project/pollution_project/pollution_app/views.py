@@ -107,19 +107,67 @@ def data_management(request):
                     reader = csv.DictReader(file)
                     records = []
                     count = 0
+                    max_records = 10000  # 上传数据量限制
+                    required_fields = ['date', 'pm25', 'pm10', 'temperature', 'humidity', 'wind_speed']
 
                     for row in reader:
+                        # 检查数据量限制
+                        if count >= max_records:
+                            raise ValueError(f"单次上传数据量不能超过{max_records}条")
+                        
+                        # 检查必需字段
+                        for field in required_fields:
+                            if field not in row or not row[field]:
+                                raise ValueError(f"第{count+1}行缺少必需字段: {field}")
+                        
+                        # 解析日期
+                        try:
+                            date_value = pd.to_datetime(row['date'])
+                        except ValueError:
+                            raise ValueError(f"第{count+1}行日期格式错误: {row['date']}")
+                        
+                        # 检查日期冲突
+                        if PollutionData.objects.filter(date=date_value).exists():
+                            # 跳过重复日期数据
+                            continue
+                        
+                        # 解析并验证数值字段
+                        try:
+                            pm25 = float(row['pm25'])
+                            pm10 = float(row['pm10'])
+                            temperature = float(row['temperature'])
+                            humidity = float(row['humidity'])
+                            wind_speed = float(row.get('wind_speed', 0))
+                            no2 = float(row.get('no2', 0))
+                            so2 = float(row.get('so2', 0))
+                            o3 = float(row.get('o3', 0))
+                            co = float(row.get('co', 0))
+                        except ValueError as e:
+                            raise ValueError(f"第{count+1}行数值格式错误: {str(e)}")
+                        
+                        # 数据质量验证
+                        if pm25 < 0:
+                            raise ValueError(f"第{count+1}行PM2.5值不能为负数: {pm25}")
+                        if pm10 < 0:
+                            raise ValueError(f"第{count+1}行PM10值不能为负数: {pm10}")
+                        if temperature < -50 or temperature > 60:
+                            raise ValueError(f"第{count+1}行温度值超出合理范围: {temperature}")
+                        if humidity < 0 or humidity > 100:
+                            raise ValueError(f"第{count+1}行湿度值超出合理范围: {humidity}")
+                        if wind_speed < 0:
+                            raise ValueError(f"第{count+1}行风速值不能为负数: {wind_speed}")
+                        
                         records.append(PollutionData(
-                            date=pd.to_datetime(row['date']),
-                            pm25=float(row['pm25']),
-                            pm10=float(row['pm10']),
-                            no2=float(row.get('no2', 0)),
-                            so2=float(row.get('so2', 0)),
-                            o3=float(row.get('o3', 0)),
-                            co=float(row.get('co', 0)),
-                            temperature=float(row['temperature']),
-                            humidity=float(row['humidity']),
-                            wind_speed=float(row.get('wind_speed', 0))
+                            date=date_value,
+                            pm25=pm25,
+                            pm10=pm10,
+                            no2=no2,
+                            so2=so2,
+                            o3=o3,
+                            co=co,
+                            temperature=temperature,
+                            humidity=humidity,
+                            wind_speed=wind_speed
                         ))
                         count += 1
 
@@ -859,7 +907,206 @@ def upload_success(request):
 
 
 def test_view(request):
-    return HttpResponse("测试视图正常工作")
+    from django.contrib.auth.models import User
+    users = User.objects.all()
+    user_list = [f"{user.id}: {user.username} ({user.email})" for user in users]
+    return HttpResponse("<br>".join(user_list))
+
+
+def test_user_management(request):
+    """
+    测试用户管理页面视图函数
+    """
+    from .forms import RegisterForm
+    from django.contrib.auth.models import User
+    
+    # 处理添加用户
+    if request.method == 'POST' and 'add_user' in request.POST:
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, f'用户 {user.username} 添加成功！')
+            return redirect('test_user_management')
+        else:
+            # 表单验证失败，显示错误信息
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = RegisterForm()
+    
+    # 获取用户列表
+    users = User.objects.all().order_by('-id')
+    print(f"测试视图获取到的用户列表: {[user.username for user in users]}")
+    print(f"测试视图用户数量: {users.count()}")
+    
+    # 使用普通字符串而不是f-string
+    html = """
+    <!DOCTYPE html>
+    <html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>测试用户管理</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container mt-5">
+            <h2>测试用户管理</h2>
+            
+            <!-- 消息提示 -->
+            {% if messages %}
+            <div class="mt-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- 添加用户表单 -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">添加用户</h5>
+                    <p class="card-text">填写以下表单添加新用户：</p>
+                    
+                    <form method="POST" action="{% url 'test_user_management' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="add_user" value="1">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_username" class="form-label">用户名</label>
+                                    <input type="text" name="username" id="id_username" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_email" class="form-label">邮箱</label>
+                                    <input type="email" name="email" id="id_email" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_password1" class="form-label">密码</label>
+                                    <input type="password" name="password1" id="id_password1" class="form-control" required>
+                                    <small class="form-text text-muted">
+                                        密码长度至少为8个字符，不能完全由数字组成，不能与用户名太相似
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_password2" class="form-label">确认密码</label>
+                                    <input type="password" name="password2" id="id_password2" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">添加用户</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 用户列表 -->
+            <div class="card mt-4" style="border: 2px solid #007bff;">
+                <div class="card-body">
+                    <h5 class="card-title">用户列表</h5>
+                    <p class="card-text">这是用户管理页面，只有拥有用户管理权限的用户才能访问。</p>
+                    
+                    <!-- 调试信息 -->
+                    <div class="alert alert-info" role="alert">
+                        <strong>调试信息：</strong>
+                        {% if users %}
+                            用户数量: {{ users|length }}
+                        {% else %}
+                            没有用户数据
+                        {% endif %}
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>邮箱</th>
+                                    <th>是否活跃</th>
+                                    <th>是否超级用户</th>
+                                    <th>注册时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if users %}
+                                    {% for user in users %}
+                                    <tr>
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.is_active|yesno:'是,否' }}</td>
+                                        <td>{{ user.is_superuser|yesno:'是,否' }}</td>
+                                        <td>{{ user.date_joined|date:'Y-m-d H:i' }}</td>
+                                        <td>
+                                            <a href="{% url 'delete_user' user.id %}" class="btn btn-danger btn-sm" onclick="return confirm('确定要删除该用户吗？');">删除</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center">没有找到用户</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>
+    """
+    
+    from django.template import Template, Context
+    template = Template(html)
+    context = Context({
+        'users': users,
+        'form': form,
+        'page_title': '测试用户管理',
+        'messages': messages.get_messages(request)
+    })
+    
+    return HttpResponse(template.render(context))
+
+
+# 删除用户视图
+@login_required
+def delete_user(request, user_id):
+    """
+    删除用户视图函数
+    只有管理员可以删除用户
+    """
+    # 检查用户是否是超级用户
+    if not request.user.is_superuser:
+        return JsonResponse({'code': 403, 'message': '权限不足'}, status=403)
+    
+    from .models import CustomUser
+    
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        # 防止删除自己
+        if request.user.username == user.username:
+            messages.error(request, '不能删除自己的账户！')
+            return redirect('user_management')
+        user.delete()
+        messages.success(request, '用户删除成功！')
+    except CustomUser.DoesNotExist:
+        messages.error(request, '用户不存在！')
+    
+    return redirect('user_management')
 
 
 # API登录视图
@@ -1381,7 +1628,81 @@ def user_management(request):
     """
     用户管理页面
     """
-    users = User.objects.all()
+    # 处理添加用户请求
+    if request.method == 'POST' and request.POST.get('add_user') == '1':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+
+        # 基本校验
+        if not username or not email or not password1 or not password2:
+            messages.error(request, '请填写所有必填字段')
+        elif password1 != password2:
+            messages.error(request, '两次输入的密码不一致')
+        else:
+            # 唯一性校验
+            from .models import CustomUser
+            if CustomUser.objects.filter(username=username).exists():
+                messages.error(request, f'用户名 {username} 已存在')
+            elif CustomUser.objects.filter(email=email).exists():
+                messages.error(request, f'邮箱 {email} 已存在')
+            else:
+                # 创建自定义用户
+                from .models import CustomUser
+                user = CustomUser.objects.create(
+                    username=username,
+                    email=email,
+                    password=password1
+                )
+                user.save()
+                messages.success(request, f'用户 {user.username} 添加成功！')
+
+        # 无论成功或失败都重定向，避免重复提交
+        return redirect('user_management')
+    
+    # 处理更新用户请求
+    elif request.method == 'POST' and request.POST.get('update_user') == '1':
+        user_id = request.POST.get('user_id')
+        new_id = request.POST.get('new_id')
+        is_superuser = request.POST.get('is_superuser') == 'on'
+        
+        try:
+            from .models import CustomUser
+            user = CustomUser.objects.get(id=user_id)
+            
+            # 防止修改自己的超级用户状态
+            if user.username == request.user.username and 'is_superuser' in request.POST:
+                messages.error(request, '不能修改自己的超级用户状态')
+            else:
+                # 更新用户ID
+                if new_id and new_id != user_id:
+                    new_id = int(new_id)
+                    # 检查新ID是否已存在
+                    if CustomUser.objects.filter(id=new_id).exists():
+                        messages.error(request, f'ID {new_id} 已被使用')
+                    else:
+                        # 在Django中直接修改ID需要特殊处理
+                        # 这里我们使用一个临时方法：创建新用户并迁移数据
+                        # 但考虑到复杂性，我们暂时只允许修改超级用户状态
+                        messages.error(request, 'ID修改功能暂未实现')
+                
+                # 更新超级用户状态
+                if 'is_superuser' in request.POST and user.username != request.user.username:
+                    user.is_superuser = is_superuser
+                    user.save()
+                    messages.success(request, f'用户 {user.username} 的超级用户状态已更新')
+        except CustomUser.DoesNotExist:
+            messages.error(request, '用户不存在')
+        except Exception as e:
+            messages.error(request, f'更新失败: {str(e)}')
+        
+        # 无论成功或失败都重定向，避免重复提交
+        return redirect('user_management')
+
+    # GET 或其他情况：展示用户列表
+    from .models import CustomUser
+    users = CustomUser.objects.all().order_by('id')
     return render(request, 'pollution_app/user_management.html', {
         'page_title': '用户管理',
         'users': users

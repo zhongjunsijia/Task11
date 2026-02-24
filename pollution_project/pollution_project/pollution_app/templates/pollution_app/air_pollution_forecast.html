@@ -53,6 +53,13 @@
                                 模型三 (后端随机森林)
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="model4-tab" data-bs-toggle="tab"
+                                    data-bs-target="#model4-content" type="button" role="tab"
+                                    aria-controls="model4-content" aria-selected="false">
+                                模型四 (综合模型)
+                            </button>
+                        </li>
                     </ul>
 
                     <!-- 标签页内容 -->
@@ -206,6 +213,42 @@
                                 </table>
                             </div>
                         </div>
+
+                        <!-- 模型四内容 -->
+                        <div class="tab-pane fade" id="model4-content" role="tabpanel" aria-labelledby="model4-tab">
+                            <!-- 加载状态覆盖层 -->
+                            <div class="loading-overlay" id="forecastChartLoader4">
+                                <div class="spinner"></div>
+                            </div>
+
+                            <!-- 预测图表 -->
+                            <div class="chart-container" style="height: 400px;">
+                                <canvas id="forecastChart4"></canvas>
+                            </div>
+
+                            <!-- 预测数据表格 -->
+                            <div class="table-responsive mt-4">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>预测日期</th>
+                                            <th>PM2.5 预测值 <span class="info-icon" data-pollutant="pm25">i</span></th>
+                                            <th>PM10 预测值 <span class="info-icon" data-pollutant="pm10">i</span></th>
+                                            <th>NO₂ 预测值 <span class="info-icon" data-pollutant="no2">i</span></th>
+                                            <th>SO₂ 预测值 <span class="info-icon" data-pollutant="so2">i</span></th>
+                                            <th>O₃ 预测值 <span class="info-icon" data-pollutant="o3">i</span></th>
+                                            <th>CO 预测值 <span class="info-icon" data-pollutant="co">i</span></th>
+                                            <th>综合AQI</th>
+                                            <th>主要污染物</th>
+                                            <th>污染等级</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="forecastTableBody4">
+                                        <!-- 数据将通过JavaScript动态填充 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -342,15 +385,17 @@
 <script>
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
-    // 初始化三个模型的预测图表
+    // 初始化四个模型的预测图表
     initForecastChart('1');
     initForecastChart('2');
     initForecastChart('3');
+    initForecastChart('4');
 
-    // 加载三个模型的预测数据
+    // 加载四个模型的预测数据
     loadForecastData('1');
     loadForecastData('2');
     loadForecastData('3');
+    loadForecastData('4');
 });
 
 // 初始化预测图表 - 接收模型编号参数

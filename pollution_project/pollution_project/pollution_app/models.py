@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from .utils.aqi_calculator import calculate_aqi, get_overall_aqi
+from django.contrib.auth.hashers import make_password, check_password
 
 class PollutionData(models.Model):
     """历史污染数据模型"""
@@ -553,3 +554,65 @@ def record_system_status():
     except Exception:
         # 如果无法获取系统状态，返回None
         return None
+
+
+# 新的用户表模型
+class CustomUser(models.Model):
+    """自定义用户表模型"""
+    username = models.CharField(max_length=50, unique=True, verbose_name="用户名")
+    email = models.EmailField(max_length=100, unique=True, verbose_name="邮箱")
+    password = models.CharField(max_length=128, verbose_name="密码")
+    is_active = models.BooleanField(default=True, verbose_name="是否激活")
+    is_superuser = models.BooleanField(default=False, verbose_name="是否超级用户")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+
+    class Meta:
+        verbose_name = "用户"
+        verbose_name_plural = "用户管理"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.username
+
+    def set_password(self, raw_password):
+        """设置密码"""
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """检查密码"""
+        return check_password(raw_password, self.password)
+
+    def save(self, *args, **kwargs):
+        """保存用户信息"""
+        # 如果密码被修改，确保它是哈希后的
+        if 'password' in self.__dict__ and not self.password.startswith('pbkdf2_'):
+            self.set_password(self.password)
+        super().save(*args, **kwargs)
+
+
+# 为CustomUser模型添加角色相关的方法
+def get_custom_user_roles(user):
+    """获取用户的所有角色"""
+    return Role.objects.filter(userrole__user__username=user.username)
+
+
+def get_custom_user_permissions(user):
+    """获取用户的所有权限"""
+    return Permission.objects.filter(rolepermission__role__userrole__user__username=user.username).distinct()
+
+
+def custom_user_has_permission(user, codename):
+    """检查用户是否拥有指定权限"""
+    return Permission.objects.filter(
+        codename=codename,
+        rolepermission__role__userrole__user__username=user.username
+    ).exists()
+
+
+def custom_user_has_role(user, role_name):
+    """检查用户是否拥有指定角色"""
+    return Role.objects.filter(
+        name=role_name,
+        userrole__user__username=user.username
+    ).exists()

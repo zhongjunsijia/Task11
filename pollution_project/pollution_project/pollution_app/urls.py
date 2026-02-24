@@ -22,6 +22,7 @@ urlpatterns = [
     path('upload/', views.upload_data, name='upload_data'),  # 数据上传
     path('upload/success/', views.upload_success, name='upload_success'),  # 上传成功页
     path('test/', views.test_view, name='test_view'),  # 测试视图
+    path('test/user-management/', views.test_user_management, name='test_user_management'),  # 测试用户管理视图
     path('forecast/air-pollution/', views.air_pollution_forecast, name='air_pollution_forecast'),  # 大气污染预测(预报预警)
     path('forecast/evaluation/', views.prediction_evaluation, name='prediction_evaluation'),  # 预测结果评估
     path('data-operation/', views.data_operation, name='data_operation'),  #数据操作主页（查询/列表）
@@ -50,6 +51,7 @@ urlpatterns = [
     # 系统管理路由
     path('system/settings/', views.system_settings, name='system_settings'),
     path('system/users/', views.user_management, name='user_management'),
+    path('system/users/delete/<int:user_id>/', views.delete_user, name='delete_user'),
     path('system/roles/', views.role_management, name='role_management'),
     path('system/models/', views.model_management_view, name='model_management_view'),
     path('system/batch-prediction/', views.batch_prediction_view, name='batch_prediction_view'),

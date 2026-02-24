@@ -41,18 +41,9 @@
                         <a class="nav-link {% if '/data-management/' in request.path %}active{% endif %}"
                            href="{% url 'data_management' %}">数据管理</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if '/system/' in request.path %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            系统管理
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'system_settings' %}">系统设置</a></li>
-                            <li><a class="dropdown-item" href="{% url 'user_management' %}">用户管理</a></li>
-                            <li><a class="dropdown-item" href="{% url 'role_management' %}">角色管理</a></li>
-                            <li><a class="dropdown-item" href="{% url 'model_management_view' %}">模型管理</a></li>
-                            <li><a class="dropdown-item" href="{% url 'batch_prediction_view' %}">批量预测</a></li>
-                            <li><a class="dropdown-item" href="{% url 'prediction_history_view' %}">预测历史</a></li>
-                        </ul>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/system/users/' in request.path %}active{% endif %}"
+                           href="{% url 'user_management' %}">用户管理</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle {% if '/data-version/' in request.path %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

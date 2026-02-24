@@ -88,7 +88,8 @@ def predict_pollution(date, temperature, humidity, wind_speed,
                 'backend_rf': 'rf',
                 'rf': 'rf',
                 'svr': 'svr',
-                'lstm': 'lstm'
+                'lstm': 'lstm',
+                'exp5': 'exp5'  # 添加exp5模型
             }
             
             # 获取对应的模型名称
@@ -259,7 +260,8 @@ def batch_predict_pollution(prediction_data, model_type='linear', use_real_time_
                 'backend_rf': 'rf',
                 'rf': 'rf',
                 'svr': 'svr',
-                'lstm': 'lstm'
+                'lstm': 'lstm',
+                'exp5': 'exp5'  # 添加exp5模型
             }
             
             # 获取对应的模型结果
